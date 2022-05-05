@@ -8,3 +8,11 @@ The purpose is to have art to look at with a purpose. Staring at art trains and 
 
 I'd imagine the game would be single player with multiplayer allowances.
 Everything must be accomplishable with a single player however if multiple people are around then it can be achieveable through multiple people if consent is intentionally given by means of a "friends" system. Non friends can still talk to eachother using a usersbook mark system.
+
+The basis artistic style would be gradients and or sold shades with programmable efffects that determine how lighting defines a gradient. It might require real time creation of OpenGL shaders as complicated as that might sound a pipeline system of programmable textures can solidify the stages and thus only need very simple chooseable shaders based on the result of the pipeline logic.
+
+Some might cal this style "cell shading" it's very similar. 
+The game must be massive multiple player online but allow for a single player package option in the event the players are unable to get online. Free trial will be given out in relation to the amount of paid players likely on a half basis. For every paid player a free trial is given out.
+Players can save progress singe player and then use their stats online . This doesn't allow for hacking as most situations within then game is isolated. There are no perks or packs or levels that grant you access. There is no strong enemy that anyone couldn't destroy the same it's purely access based so jacking the single player game package would give you access and not unfair combat advantage.
+There is no player vs player so that the psychology of the mind allocates into two groups, U.S. vs them. So this way communication is very easily well communicated. Then is the enemies, mostly animals and bugs found in the real world. Most elements of battle will be of simplistic terms. No complex devices are nessecary to manage the player, no invisible attacks such as poison or radiation.
+For every action their is a physically observable reason. For every action their is a visual that can be traced by the player.
