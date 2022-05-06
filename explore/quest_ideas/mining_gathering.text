@@ -1,0 +1,14 @@
+The games economy will be based on items existing. Items can exist by hand mining elements that could be mind with the hand and then using it to build mining objects such as mining/gathering sticks on the ground along with fabric plants to rope together a rock and a stick then the mined ore could be used to sell/trade or mine metals to either become your own blacksmith or Order a blacksmith to create a pick axe to mine for specific metals.
+The economy is as liquid as the players gathering is. No items disappear, when players (presumably maliciously) drop a lot of items then it will instead of visually be displayed will have a text dialogue to view it as a 2d rendering selection screen.
+Items must be used with the hands one at a one or two at a time so there is no take all button.
+One at a time is faster but secures less items to the player.
+Two items is slightly slower but secure more items to the player.
+The time to take an item and carry it will take about one second.
+This one second time delay will be used to authorize the player who sent their
+Time stamp first to pick up the item. Sending not available signal to other players that tried to pick it up.
+Two items picked up at the same time will take two seconds total to commit to the players backpack/belt/chest however 
+They are likely to get two items as long as the time stamp was the first one to initiate the pick up.
+
+Resources where uninterrupted continuous work was exhumed will garuntee the player to commit that to the bag/(or cart?).
+Resources can be used to help NPC' provide liquidity at the local market places and thus will provide players with varying pricing schemes.
+NPC' will be assigned a story(?) so that their prices reflect accordingly, someone who has no use for hitting sticks might sell them for a low price. To NPC that guard the areas might find hitting sticks valueable and sell high when in high demand but if there is a lot of enemies around due to the rate of reproduction due to their food gathering success as a clan of bees for example then the guards might sell at a low price to make his job easier or more Precisely prevent the town/city from being over ran.
