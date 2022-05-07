@@ -9,6 +9,11 @@
       
       //shaders
       var solid_color_vertex_shader = null;
+      var solid_color_vertex_shader_source_code = null;
+      var solid_color_fragment_shader = null;
+      var solid_color_fragment_shader_source_code = null;
+      var solid_color_shader_program = null;
+      
       
       //models
         //multicolored triangle
@@ -16,7 +21,7 @@
         var triangle_vertex_opengles = null;
         
       /* Venmo: Shane-Betz1990 */
-      function start_adventure_game()
+      function start_render()
       {
         //open gl
         canvas_handle = document.getElementById("canvas_for_opengles");
@@ -27,59 +32,42 @@
         
         //compile and thus have anticipated shaders ready.
         solid_color_vertex_shader = opengles.createShader(opengles.VERTEX_SHADER);
-            //Define how each vertex is colorized by defining a color to each point.
-              //Define the C source code to be imported into the Open GL ES engine related to vertex shader.
-              var solid_color_vertex_shader_source_code = "";
-                  solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "attribute vec4 position_of_vertex_to_colorize; \n";
-                  solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "attribute vec4 color_of_vertex_to_colorize; \n";
-                  solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "varying vec4 varying_color_of_vertex_to_colorize; \n";
-                  solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "void main() { \n";
-                  solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "  //colorize position.  \n";
-                  solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "  gl_Position = position_of_vertex_to_colorize; \n";
-                  solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "  varying_color_of_vertex_to_colorize = color_of_vertex_to_colorize;  \n";
-                  solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "} \n";
+        solid_color_vertex_shader_source_code = "";
+        solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "attribute vec4 position_of_vertex_to_colorize; \n";
+        solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "attribute vec4 color_of_vertex_to_colorize; \n";
+        solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "varying vec4 varying_color_of_vertex_to_colorize; \n";
+        solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "void main() { \n";
+        solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "  //colorize position.  \n";
+        solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "  gl_Position = position_of_vertex_to_colorize; \n";
+        solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "  varying_color_of_vertex_to_colorize = color_of_vertex_to_colorize;  \n";
+        solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "} \n";
                   
-              //Transfer C source code to the Open GL ES engine and associate that transfer with the a handleable variable named solid_color_vertex_shader.
-              opengles.shaderSource(solid_color_vertex_shader , solid_color_vertex_shader_source_code);
+        opengles.shaderSource(solid_color_vertex_shader , solid_color_vertex_shader_source_code);
               
-              //Trigger the Open GL ES engine to compile the C source code that is associated with the solid_color_vertex_shader variable.
-              opengles.compileShader(solid_color_vertex_shader);
+        opengles.compileShader(solid_color_vertex_shader);
               
-          //Allocate fragment shader within the opengl engine and make that fragment shader handled by a useable variable.
-          var solid_color_fragment_shader = opengles.createShader(opengles.FRAGMENT_SHADER);
-              //Define how fragments of the vertex or vertices are filitered.
-                //Define the C source code to be imported into the Open GL ES engine.
-                var solid_color_fragment_shader_source_code = "";
-                    solid_color_fragment_shader_source_code = solid_color_fragment_shader_source_code + "precision mediump float;  \n";
-                    solid_color_fragment_shader_source_code = solid_color_fragment_shader_source_code + "varying vec4 varying_color_of_vertex_to_colorize; \n";
-                    solid_color_fragment_shader_source_code = solid_color_fragment_shader_source_code + "void main() { \n";
-                    solid_color_fragment_shader_source_code = solid_color_fragment_shader_source_code + "  //Define filter \n";
-                    solid_color_fragment_shader_source_code = solid_color_fragment_shader_source_code + "  gl_FragColor = varying_color_of_vertex_to_colorize; \n";
-                    solid_color_fragment_shader_source_code = solid_color_fragment_shader_source_code + "} \n";
+        solid_color_fragment_shader = opengles.createShader(opengles.FRAGMENT_SHADER);
+        solid_color_fragment_shader_source_code = "";
+        solid_color_fragment_shader_source_code = solid_color_fragment_shader_source_code + "precision mediump float;  \n";
+        solid_color_fragment_shader_source_code = solid_color_fragment_shader_source_code + "varying vec4 varying_color_of_vertex_to_colorize; \n";
+        solid_color_fragment_shader_source_code = solid_color_fragment_shader_source_code + "void main() { \n";
+        solid_color_fragment_shader_source_code = solid_color_fragment_shader_source_code + "  //Define filter \n";
+        solid_color_fragment_shader_source_code = solid_color_fragment_shader_source_code + "  gl_FragColor = varying_color_of_vertex_to_colorize; \n";
+        solid_color_fragment_shader_source_code = solid_color_fragment_shader_source_code + "} \n";
                 
-              //Transfer C source code to the Open GL ES engine and associate that transfer with the solid_color_fragement_shader handle.
-              opengles.shaderSource(solid_color_fragment_shader, solid_color_fragment_shader_source_code);
+        opengles.shaderSource(solid_color_fragment_shader, solid_color_fragment_shader_source_code);
                 
-              //Trigger the Open GL ES engine to compile the C source code that is associated with the solid_color_fragement_shader handle.
-              opengles.compileShader(solid_color_fragment_shader);
+        opengles.compileShader(solid_color_fragment_shader);
                 
-          //Allocate one Shader Program(C structure of memory allocated within Open GL ES memory hardware.) within the Open GL ES engine and make that shader program handled by a useable variable.
-          var solid_color_shader_program = opengles.createProgram();
-            //Append intended shaders to the shader program(not sure if this is infinite appendable or the strict definitions of vertex and fragment shaders).
-              //Flag vertex shader to be apart of the shader program intended to be recognized during the link process.
-              opengles.attachShader(solid_color_shader_program, solid_color_vertex_shader);
-          
-              //Flag fragement shader to be apart of the shader program intended to be recognized during the link process.
-              opengles.attachShader(solid_color_shader_program, solid_color_fragment_shader);
-              
-            //Link vertex shader and fragment shader which results into a handlable solid color opengl binary shader program.
-            opengles.linkProgram(solid_color_shader_program);
+        solid_color_shader_program = opengles.createProgram();
+        opengles.attachShader(solid_color_shader_program, solid_color_vertex_shader);
+        opengles.attachShader(solid_color_shader_program, solid_color_fragment_shader);
+        opengles.linkProgram(solid_color_shader_program);
       
-            //Due to the order of operations paradigm, checking if the linkage was succesfful must be determined immediately after or more precisely before an Open GL engine operation not assocated with shader program link or compliation process.
-            if(!opengles.getProgramParameter(solid_color_shader_program, opengles.LINK_STATUS))
-            {
-              alert("shader link process failed.");
-            }
+        if(!opengles.getProgramParameter(solid_color_shader_program, opengles.LINK_STATUS))
+        {
+          alert("shader link process failed.");
+        }
        
         //define triangle vertex.
         triangle_and_color_vertex = new Float32Array([
