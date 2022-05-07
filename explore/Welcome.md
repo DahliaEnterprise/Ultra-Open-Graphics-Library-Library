@@ -8,7 +8,10 @@ The purpose is to have art to look at with a purpose. Staring at art trains and 
 
 I'd imagine the game would be single player with multiplayer allowances.
 Everything must be accomplishable with a single player however if multiple people are around then it can be achieveable through multiple people if consent is intentionally given by means of a "friends" system. Non friends can still talk to eachother using a usersbook mark system.
-
+The whole game will be server streamed based(also called the cloud) so someone would have to recreate the server/service to be able to play offline.
+The purpose of server based only is to encourage payments for items and or clothing, then also the obvious incentive to continue maintaining the game,
+And also maintain multiplayer.
+But then again I might end up posting the source code on GitHub for a poor man's copyright.
 The basis artistic style would be gradients and or sold shades with programmable efffects that determine how lighting defines a gradient. It might require real time creation of OpenGL shaders as complicated as that might sound a pipeline system of programmable textures can solidify the stages and thus only need very simple chooseable shaders based on the result of the pipeline logic.
 
 Some might cal this style "cell shading" it's very similar. 
