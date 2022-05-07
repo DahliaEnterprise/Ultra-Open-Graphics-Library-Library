@@ -20,8 +20,12 @@
         var triangle_and_color_vertex = null;
         var triangle_vertex_opengles = null;
         
+      //functions (header)
+      var start_render = null;
+      var render_frame = null;
+      
       /* Venmo: Shane-Betz1990 */
-      function start_render()
+      start_render = function()
       {
         //open gl
         canvas_handle = document.getElementById("canvas_for_opengles");
@@ -76,25 +80,24 @@
                                                        0.5, -0.5, 0.0, 0.0, 0.0, 1.0, 1.0
                                                     ]);
         
-          //Transfer vertex data from motherboard' ram to GPU(Open GL ES accessable) ram using the CPU as a transfer mechanism.
-            //Allocate C structure within the Open GL ES engine.
-            triangle_vertex_opengles = opengles.createBuffer();
+         //render one frame(it stays on screen as long as clear isnt called)
+         render_frame();
         
-            //Alert Open GL ES engine on how to interpret and utilize the following data about to be uploaded to the GPU ram(as it wont always be vertex or vertices arrays).
-            opengles.bindBuffer(opengles.ARRAY_BUFFER, triangle_vertex_opengles);
-            
-            //Alert Open GL ES engine with how big of a memory size to be ready to accept during the upcoming (complex but made simple) data transfer.
-            opengles.bufferData(opengles.ARRAY_BUFFER, triangle_and_color_vertex, opengles.STATIC_DRAW);
+      }
+      
+      render_frame = function()
+      {
+        //prepare frame before clearing screen (prevents blank screens even if seemingly unnoticeable)
+        triangle_vertex_opengles = opengles.createBuffer();
+        opengles.bindBuffer(opengles.ARRAY_BUFFER, triangle_vertex_opengles);
+        opengles.bufferData(opengles.ARRAY_BUFFER, triangle_and_color_vertex, opengles.STATIC_DRAW);
              
-            //Alert Open GL ES engine the item size is three indicating to interpret the data as X,Y,Z per every three floats(decimals) uploaded to the GPU ram.
-            triangle_vertex_opengles.positionSize = 3;
-            triangle_vertex_opengles.colorSize = 4;
+        triangle_vertex_opengles.positionSize = 3;
+        triangle_vertex_opengles.colorSize = 4;
             
-            //Alert Open GL ES engine how many groups of three there is. With out this precount it will not work but most importantly if Open GL ES engine counted for you it could stall an entire graphics application by the magnitude of seconds with only a few obiects on screen.
-            triangle_vertex_opengles.numberOfItems = 3;
+        triangle_vertex_opengles.numberOfItems = 3;
 
-            //update changes by binding buffer again
-            opengles.bindBuffer(opengles.ARRAY_BUFFER, triangle_vertex_opengles);
+        opengles.bindBuffer(opengles.ARRAY_BUFFER, triangle_vertex_opengles);
             
 
        
@@ -104,37 +107,27 @@
         opengles.viewport(0, 0, opengles.viewportWidth, opengles.viewportHeight);
         opengles.clear(opengles.COLOR_BUFFER_BIT);
         
-        //vertex, color, and shader data should be uploaded before the major goal of drawing is invoked 
-        //Set the shader program to use for the following vertex or vertices and its defineable attributes.
-          //Pop in a shader program to be used within the following order of operations.
-          opengles.useProgram(solid_color_shader_program);
-        
-          //Define the assembly level GPU data transfer and processing line of "vertex position attribute" to be associated with the defined logical programming set within the result of position_of_vertex_to_colorize of the shader program.
-          solid_color_shader_program.vertexPositionAttribute = opengles.getAttribLocation(solid_color_shader_program, "position_of_vertex_to_colorize");
+        //draw
+        opengles.useProgram(solid_color_shader_program);
+       
+        solid_color_shader_program.vertexPositionAttribute = opengles.getAttribLocation(solid_color_shader_program, "position_of_vertex_to_colorize");
          
-          //Define the assembly level GPU data transfer and processing line of "vertex color attribute" to be associated with the defined logical programming set within the result of color_of_vertex_to_colorize of the shader program.
-          solid_color_shader_program.vertexColorAttribute = opengles.getAttribLocation(solid_color_shader_program, "color_of_vertex_to_colorize");
+        solid_color_shader_program.vertexColorAttribute = opengles.getAttribLocation(solid_color_shader_program, "color_of_vertex_to_colorize");
           
-        //tell the GPU data line to get ready to transfer position data.
         opengles.vertexAttribPointer(solid_color_shader_program.vertexPositionAttribute,  triangle_vertex_opengles.positionSize, opengles.FLOAT, false, 28, 0);
         
-        //tell the GPU data line to get ready to transfer color data.
         opengles.vertexAttribPointer(solid_color_shader_program.vertexColorAttribute,  triangle_vertex_opengles.colorSize, opengles.FLOAT, false, 28, 12);
         
-        //tell the gpu you have decided what to transfer and that it is about to happen.
         opengles.enableVertexAttribArray(solid_color_shader_program.vertexPositionAttribute);
       
-        //tell the gpu you have decided what to transfer and that it is about to happen.
         opengles.enableVertexAttribArray(solid_color_shader_program.vertexColorAttribute);
         
-        //tell the gpu to start the transfer which also trigger the draw after the transfer has completed.
         opengles.drawArrays(opengles.TRIANGLES, 0, triangle_vertex_opengles.numberOfItems);
-        
         
       }
     </script>
   </head>
-  <body onLoad="start_adventure_game();">
+  <body onLoad="start_render();">
     <canvas id="canvas_for_opengles" width="500" height="500"></canvas>
   </body>
 </html>
