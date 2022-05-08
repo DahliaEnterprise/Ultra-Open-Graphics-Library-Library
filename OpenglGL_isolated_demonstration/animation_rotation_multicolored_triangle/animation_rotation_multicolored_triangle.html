@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html>
   <head>
@@ -108,7 +107,7 @@
         canvas_handle = document.getElementById("canvas_for_opengles");
         
         opengles = canvas_handle.getContext("webgl2", {
-                                                        antialias: true,
+                                                        antialias: false,
                                                         depth: true,
                                                         desynchronized: true,
                                                         powerPreference: "high-performance",
@@ -157,13 +156,6 @@
         }
        
         //define triangle vertex.
-       /* triangle_and_color_vertex = new Float32Array([
-                                                       0.0, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,
-                                                      -0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 1.0,
-                                                       0.5, -0.5, 0.0, 0.0, 0.0, 1.0, 1.0
-                                                    ]);*/
-            
-            
          triangle_vertex = new Float32Array([
                                               0.0, 0.5, 0.0, 
                                               -0.5, -0.5, 0.0,
@@ -179,7 +171,7 @@
          
         
          //render frame loop
-         render_frame_interval = (1000 / 60); //target frame per second, 1000 milliseconds divided by target frame rate;
+         render_frame_interval = (1000 / 30); //target frame per second, 1000 milliseconds divided by target frame rate;
          render_frame_last_rendered_timestamp = Date.now();
          tick_game_conditions();
         
@@ -204,13 +196,19 @@
         {
          render_frame_last_rendered_timestamp = Date.now();
         
-         //prepare frame before clearing screen (prevents blank screens even if seemingly unnoticeable)
+        
+         //Clear the viewport(screen) before drawing a new frame. (you will always do it this way, the only rare times you will add on to an already drawn frame is maybe an Operating System window(or UI) that goes on top of everything else and usually only when there is no alpha or moving objects).
+         opengles.clearColor(0.0, 0.0, 0.0, 1.0);
+         opengles.viewport(0, 0, opengles.viewportWidth, opengles.viewportHeight);
+         opengles.clear(opengles.COLOR_BUFFER_BIT);
+        
+         //draw multi colored triangle
          triangle_and_color_metadata.rotation.z += 0.05;
          
          let triangle_vertex_manipulated = new Float32Array(triangle_vertex);
          
    
-         triangle_vertex_manipulated = vertex_manipulation_rotate_z_axis(triangle_vertex_manipulated, triangle_total_rows, triangle_and_color_metadata.rotation.z);
+         triangle_vertex_manipulated = vertex_manipulation_rotate_z_axis(triangle_vertex_manipulated, triangle_total_rows, triangle_and_color_metadata.rotation.z, 0, 1);
        
          triangle_and_rgba_color_vertex_manipulated = combine_vertex_and_rgba_color(triangle_vertex_manipulated, triangle_rgba_color, triangle_total_rows);
         
@@ -226,11 +224,6 @@
          opengles.bindBuffer(opengles.ARRAY_BUFFER, triangle_vertex_opengles);
             
             
-         //Clear the viewport(screen) before drawing a new frame. (you will always do it this way, the only rare times you will add on to an already drawn frame is maybe an Operating System window(or UI) that goes on top of everything else and usually only when there is no alpha or moving objects).
-         opengles.clearColor(0.0, 0.0, 0.0, 1.0);
-         opengles.viewport(0, 0, opengles.viewportWidth, opengles.viewportHeight);
-         opengles.clear(opengles.COLOR_BUFFER_BIT);
-        
          //draw
          opengles.useProgram(solid_color_shader_program);
        
@@ -449,7 +442,7 @@
       
       //vertex manipulation
         //z axis rotation
-        vertex_manipulation_rotate_z_axis = function(vertex_to_manipulate, total_rows, z_degrees_to_apply)
+        vertex_manipulation_rotate_z_axis = function(vertex_to_manipulate, total_rows, z_degrees_to_apply, plane_one_index, plane_two_index)
         {
           let manipulated_z_vertex = new Float32Array(vertex_to_manipulate);
         
@@ -463,8 +456,8 @@
             let row = 0;
             while(row < total_rows)
             {
-              let point_to_rotate_x = manipulated_z_vertex[vertex_to_manipulate_index];
-              let point_to_rotate_y = manipulated_z_vertex[vertex_to_manipulate_index+1];
+              let point_to_rotate_x = manipulated_z_vertex[vertex_to_manipulate_index+plane_one_index];
+              let point_to_rotate_y = manipulated_z_vertex[vertex_to_manipulate_index+plane_two_index];
               
             
               //
@@ -472,8 +465,8 @@
               let angle_as_radians_x_y = get_two_dimensional_angle_as_radians(hypotenus_adjacent_opposite_x_y.adjacent, hypotenus_adjacent_opposite_x_y.hypotenus, 0, 0, point_to_rotate_x, point_to_rotate_y);
               let rotated_points_x_y = get_two_dimensional_rotated_points(hypotenus_adjacent_opposite_x_y.hypotenus, angle_as_radians_x_y, z_degrees_to_apply);
          
-              manipulated_z_vertex[vertex_to_manipulate_index] = rotated_points_x_y.rotated_x;
-              manipulated_z_vertex[vertex_to_manipulate_index+1] = rotated_points_x_y.rotated_y;
+              manipulated_z_vertex[vertex_to_manipulate_index+plane_one_index] = rotated_points_x_y.rotated_x;
+              manipulated_z_vertex[vertex_to_manipulate_index+plane_two_index] = rotated_points_x_y.rotated_y;
          
               
               //next row
