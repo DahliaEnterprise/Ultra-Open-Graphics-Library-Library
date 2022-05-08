@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Adventure Game</title>
+    <script type="text/javascript">
+      //open gl
+      var canvas_handle = null;
+      var opengles = null;
+      
+      //shaders
+      var solid_color_vertex_shader = null;
+      var solid_color_vertex_shader_source_code = null;
+      var solid_color_fragment_shader = null;
+      var solid_color_fragment_shader_source_code = null;
+      var solid_color_shader_program = null;
+      
+      
+      //models
+        //multicolored triangle
+        var triangle_and_color_vertex = null;
+        var triangle_vertex_opengles = null;
+        
+      //functions (header)
+      var start_render = null;
+      var render_frame = null;
+      
+      /* Venmo: Shane-Betz1990 */
+      start_render = function()
+      {
+        //open gl
+        canvas_handle = document.getElementById("canvas_for_opengles");
+        
+        opengles = canvas_handle.getContext("webgl2");
+        opengles.viewportWidth = canvas_handle.width;
+        opengles.viewportHeight = canvas_handle.height;
+        
+        //compile and thus have anticipated shaders ready.
+        solid_color_vertex_shader = opengles.createShader(opengles.VERTEX_SHADER);
+        solid_color_vertex_shader_source_code = "";
+        solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "attribute vec4 position_of_vertex_to_colorize; \n";
+        solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "attribute vec4 color_of_vertex_to_colorize; \n";
+        solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "varying vec4 varying_color_of_vertex_to_colorize; \n";
+        solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "void main() { \n";
+        solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "  //colorize position.  \n";
+        solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "  gl_Position = position_of_vertex_to_colorize; \n";
+        solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "  varying_color_of_vertex_to_colorize = color_of_vertex_to_colorize;  \n";
+        solid_color_vertex_shader_source_code = solid_color_vertex_shader_source_code + "} \n";
+                  
+        opengles.shaderSource(solid_color_vertex_shader , solid_color_vertex_shader_source_code);
+              
+        opengles.compileShader(solid_color_vertex_shader);
+              
+        solid_color_fragment_shader = opengles.createShader(opengles.FRAGMENT_SHADER);
+        solid_color_fragment_shader_source_code = "";
+        solid_color_fragment_shader_source_code = solid_color_fragment_shader_source_code + "precision mediump float;  \n";
+        solid_color_fragment_shader_source_code = solid_color_fragment_shader_source_code + "varying vec4 varying_color_of_vertex_to_colorize; \n";
+        solid_color_fragment_shader_source_code = solid_color_fragment_shader_source_code + "void main() { \n";
+        solid_color_fragment_shader_source_code = solid_color_fragment_shader_source_code + "  //Define filter \n";
+        solid_color_fragment_shader_source_code = solid_color_fragment_shader_source_code + "  gl_FragColor = varying_color_of_vertex_to_colorize; \n";
+        solid_color_fragment_shader_source_code = solid_color_fragment_shader_source_code + "} \n";
+                
+        opengles.shaderSource(solid_color_fragment_shader, solid_color_fragment_shader_source_code);
+                
+        opengles.compileShader(solid_color_fragment_shader);
+                
+        solid_color_shader_program = opengles.createProgram();
+        opengles.attachShader(solid_color_shader_program, solid_color_vertex_shader);
+        opengles.attachShader(solid_color_shader_program, solid_color_fragment_shader);
+        opengles.linkProgram(solid_color_shader_program);
+      
+        if(!opengles.getProgramParameter(solid_color_shader_program, opengles.LINK_STATUS))
+        {
+          alert("shader link process failed.");
+        }
+       
+        //define triangle vertex.
+        triangle_and_color_vertex = new Float32Array([
+                                                       0.0, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,
+                                                      -0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 1.0,
+                                                       0.5, -0.5, 0.0, 0.0, 0.0, 1.0, 1.0
+                                                    ]);
+        
+         //render one frame(it stays on screen as long as clear isnt called)
+         render_frame();
+        
+      }
+      
+      render_frame = function()
+      {
+        //prepare frame before clearing screen (prevents blank screens even if seemingly unnoticeable)
+        triangle_vertex_opengles = opengles.createBuffer();
+        opengles.bindBuffer(opengles.ARRAY_BUFFER, triangle_vertex_opengles);
+        opengles.bufferData(opengles.ARRAY_BUFFER, triangle_and_color_vertex, opengles.STATIC_DRAW);
+             
+        triangle_vertex_opengles.positionSize = 3;
+        triangle_vertex_opengles.colorSize = 4;
+            
+        triangle_vertex_opengles.numberOfItems = 3;
+
+        opengles.bindBuffer(opengles.ARRAY_BUFFER, triangle_vertex_opengles);
+            
+
+       
+        
+        //Clear the viewport(screen) before drawing a new frame. (you will always do it this way, the only rare times you will add on to an already drawn frame is maybe an Operating System window(or UI) that goes on top of everything else and usually only when there is no alpha or moving objects).
+        opengles.clearColor(0.0, 0.0, 0.0, 1.0);
+        opengles.viewport(0, 0, opengles.viewportWidth, opengles.viewportHeight);
+        opengles.clear(opengles.COLOR_BUFFER_BIT);
+        
+        //draw
+        opengles.useProgram(solid_color_shader_program);
+       
+        solid_color_shader_program.vertexPositionAttribute = opengles.getAttribLocation(solid_color_shader_program, "position_of_vertex_to_colorize");
+         
+        solid_color_shader_program.vertexColorAttribute = opengles.getAttribLocation(solid_color_shader_program, "color_of_vertex_to_colorize");
+          
+        opengles.vertexAttribPointer(solid_color_shader_program.vertexPositionAttribute,  triangle_vertex_opengles.positionSize, opengles.FLOAT, false, 28, 0);
+        
+        opengles.vertexAttribPointer(solid_color_shader_program.vertexColorAttribute,  triangle_vertex_opengles.colorSize, opengles.FLOAT, false, 28, 12);
+        
+        opengles.enableVertexAttribArray(solid_color_shader_program.vertexPositionAttribute);
+      
+        opengles.enableVertexAttribArray(solid_color_shader_program.vertexColorAttribute);
+        
+        opengles.drawArrays(opengles.TRIANGLES, 0, triangle_vertex_opengles.numberOfItems);
+        
+      }
+    </script>
+  </head>
+  <body onLoad="start_render();">
+    <canvas id="canvas_for_opengles" width="500" height="500"></canvas>
+  </body>
+</html>
