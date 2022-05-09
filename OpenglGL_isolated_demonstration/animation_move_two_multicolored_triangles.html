@@ -32,6 +32,16 @@
                                            };
         var triangle_and_rgba_color_vertex_manipulated = null;
                       
+        var triangle_two_vertex = null;
+        var triangle_two_rgba_color = null;
+        var triangle_two_total_rows = null;
+        var triangle_two_vertex_opengles = null;
+        var triangle_two_and_color_metadata = { "position": { "x": 0.000000, "y": 0.000000, "z": 0.000000 },
+                                            "rotation": { "x": 0.000000, "y": 0.000000, "z": 0.000000 },
+                                            "scale": {  "x": 1.000000, "y": 1.000000, "z": 1.000000 },
+                                           };
+        var triangle_two_and_rgba_color_vertex_manipulated = null;
+                   
       //functions (header)
         //start main program
         var start_render = null;
@@ -87,6 +97,14 @@
         opengles.viewportWidth = canvas_handle.width;
         opengles.viewportHeight = canvas_handle.height;
         
+        //depth (test)
+        opengles.enable(opengles.DEPTH_TEST);
+        opengles.depthFunc(opengles.LESS);
+        
+        //enable, and set cull face; dont rely on default setting
+        opengles.enable(opengles.CULL_FACE);
+        opengles.cullFace(opengles.BACK);
+        
         //compile and thus have anticipated shaders ready.
         solid_color_vertex_shader = opengles.createShader(opengles.VERTEX_SHADER);
         solid_color_vertex_shader_source_code = "";
@@ -127,7 +145,7 @@
         }
        
        //define triangle vertex.
-         triangle_vertex = new Float32Array([
+       triangle_vertex = new Float32Array([
                                               0.0, 0.5, 0.0, 
                                               -0.5, -0.5, 0.0,
                                               0.5, -0.5, 0.0
@@ -136,16 +154,33 @@
                                              ]);
                                              
                                              
-         triangle_rgba_color = new Float32Array([
+       triangle_rgba_color = new Float32Array([
                                                   1.0, 0.0, 0.0, 1.0,
                                                   0.0, 1.0, 0.0, 1.0,
                                                   0.0, 0.0, 1.0, 1.0
                                                   
                                                   
                                                 ]);       
-         triangle_total_rows = 3;
+       triangle_total_rows = 3;
          
          
+       triangle_two_vertex = new Float32Array([
+                                              0.0, 0.5, -0.1, 
+                                              -0.5, -0.5, -0.1,
+                                              0.5, -0.5, -0.1
+                                              
+                                              
+                                             ]);
+                                             
+                                             
+       triangle_two_rgba_color = new Float32Array([
+                                                  1.0, 0.6, 0.5, 1.0,
+                                                  1.0, 0.6, 0.5, 1.0,
+                                                  1.0, 0.6, 0.5, 1.0
+                                                  
+                                                  
+                                                ]);       
+       triangle_two_total_rows = 3;
         
        
          //render frame loop
@@ -217,7 +252,41 @@
         
          opengles.drawArrays(opengles.TRIANGLES, 0, triangle_vertex_opengles.numberOfItems);
         
+         let triangle_two_vertex_manipulated = new Float32Array(triangle_vertex);
+         
+         triangle_two_vertex_manipulated = render_frame_translate_position(triangle_two_vertex_manipulated, triangle_two_total_rows, triangle_two_and_color_metadata.position.x, triangle_two_and_color_metadata.position.y, triangle_two_and_color_metadata.position.z);
       
+         triangle_two_and_rgba_color_vertex_manipulated = combine_vertex_and_rgba_color(triangle_two_vertex_manipulated, triangle_two_rgba_color, triangle_two_total_rows);
+        
+         triangle_two_vertex_opengles = opengles.createBuffer();
+         opengles.bindBuffer(opengles.ARRAY_BUFFER, triangle_two_vertex_opengles);
+         opengles.bufferData(opengles.ARRAY_BUFFER, triangle_two_and_rgba_color_vertex_manipulated, opengles.STATIC_DRAW);
+             
+         triangle_two_vertex_opengles.positionSize = 3;
+         triangle_two_vertex_opengles.colorSize = 4;
+            
+         triangle_two_vertex_opengles.numberOfItems = triangle_two_total_rows;
+
+         opengles.bindBuffer(opengles.ARRAY_BUFFER, triangle_two_vertex_opengles);
+            
+            
+         //draw
+         opengles.useProgram(solid_color_shader_program);
+       
+         solid_color_shader_program.vertexPositionAttribute = opengles.getAttribLocation(solid_color_shader_program, "position_of_vertex_to_colorize");
+         
+         solid_color_shader_program.vertexColorAttribute = opengles.getAttribLocation(solid_color_shader_program, "color_of_vertex_to_colorize");
+          
+         opengles.vertexAttribPointer(solid_color_shader_program.vertexPositionAttribute,  triangle_two_vertex_opengles.positionSize, opengles.FLOAT, false, 28, 0);
+        
+         opengles.vertexAttribPointer(solid_color_shader_program.vertexColorAttribute,  triangle_two_vertex_opengles.colorSize, opengles.FLOAT, false, 28, 12);
+        
+         opengles.enableVertexAttribArray(solid_color_shader_program.vertexPositionAttribute);
+      
+         opengles.enableVertexAttribArray(solid_color_shader_program.vertexColorAttribute);
+        
+         opengles.drawArrays(opengles.TRIANGLES, 0, triangle_two_vertex_opengles.numberOfItems);
+        
    
         }
       }
