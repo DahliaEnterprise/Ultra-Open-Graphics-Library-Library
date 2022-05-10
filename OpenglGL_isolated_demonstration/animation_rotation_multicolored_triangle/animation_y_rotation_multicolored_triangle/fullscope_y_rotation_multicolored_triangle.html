@@ -56,7 +56,7 @@
             //rotation assistant.
             var get_two_dimensional_adjacent_opposite_hypotenus = null;
             var get_two_dimensional_angle_as_radians = null;
-            
+            var get_two_dimensional_apply_desired_rotation = null;
             
       //define functions.
       combine_vertex_and_rgba_color = function(vertex, rgba_color, total_rows)
@@ -181,11 +181,10 @@
       tick_game_conditions = function()
       {
         let timepassed_since_last_game_tick = Date.now() - tick_game_conditions_last_tick_timestamp;
-        if(timepassed_since_last_game_tick <= 0)
-        {
-          timepassed_since_last_game_tick = 1;
+        if(timepassed_since_last_game_tick >= 1)
+        { 
+          triangle_and_color_metadata.rotation.y += (timepassed_since_last_game_tick*0.005);
         }
-        triangle_and_color_metadata.rotation.y += (timepassed_since_last_game_tick*0.005);;
         
         //flag frame to render(function will decide if its time for sure).
         render_frame();
@@ -215,10 +214,9 @@
          //draw multi colored triangle
          let triangle_vertex_manipulated = new Float32Array(triangle_vertex);
          
-        triangle_vertex_manipulated =  render_frame_translate_rotation_y(triangle_vertex_manipulated, triangle_total_rows, triangle_and_color_metadata.rotation.y);
+         triangle_vertex_manipulated =  render_frame_translate_rotation_y(triangle_vertex_manipulated, triangle_total_rows, triangle_and_color_metadata.rotation.y);
       
-        // triangle_vertex_manipulated = render_frame_translate_position(triangle_vertex_manipulated, triangle_total_rows, triangle_and_color_metadata.position.x, triangle_and_color_metadata.position.y, triangle_and_color_metadata.position.z);
-      
+       
          triangle_and_rgba_color_vertex_manipulated = combine_vertex_and_rgba_color(triangle_vertex_manipulated, triangle_rgba_color, triangle_total_rows);
         
          triangle_vertex_opengles = opengles.createBuffer();
@@ -288,7 +286,7 @@
         let row = 0;
         while(row < total_rows_within_vertex)
         {
-          //point two z and x.
+          //point two x and y.
           let point_two_z = output[vertex_index+2];
           let point_two_x = output[vertex_index];
           
@@ -299,7 +297,7 @@
           let three_hundred_and_sixty_degrees_as_radians = get_two_dimensional_angle_as_radians(adjacent_opposite_hypotenus.adjacent, adjacent_opposite_hypotenus.hypotenus, 0, 0, point_two_z, point_two_x);
       
           //apply desired rotation
-          let rotated_point = get_two_dimensional_apply_desired_rotation(three_hundred_and_sixty_degrees_as_radians, offset_y_rotation, adjacent_opposite_hypotenus.hypotenus)
+          let rotated_point = get_two_dimensional_apply_desired_rotation(three_hundred_and_sixty_degrees_as_radians, offset_y_rotation, adjacent_opposite_hypotenus.hypotenus);
       
           
           
