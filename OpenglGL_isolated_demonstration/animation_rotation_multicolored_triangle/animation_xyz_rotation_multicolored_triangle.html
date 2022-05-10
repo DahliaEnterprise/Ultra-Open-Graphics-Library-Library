@@ -52,11 +52,16 @@
           //render rotation translation.
             //x
             var render_frame_translate_rotation_x = null;
+            //y
+            var render_frame_translate_rotation_y = null;
+            //z
+            var render_frame_translate_rotation_z = null;
+            
             
             //rotation assistant.
             var get_two_dimensional_adjacent_opposite_hypotenus = null;
             var get_two_dimensional_angle_as_radians = null;
-            
+            var get_two_dimensional_apply_desired_rotation = null;
             
       //define functions.
       combine_vertex_and_rgba_color = function(vertex, rgba_color, total_rows)
@@ -94,17 +99,24 @@
         //open gl
         canvas_handle = document.getElementById("canvas_for_opengles");
         
-        opengles = canvas_handle.getContext("webgl2");
+        opengles = canvas_handle.getContext("webgl2", {
+                                                        "antialias": true,
+                                                        "depth": true
+                                                      });
         opengles.viewportWidth = canvas_handle.width;
         opengles.viewportHeight = canvas_handle.height;
+        
+        //antialias
+        opengles.enable(opengles.SAMPLE_COVERAGE);
+        opengles.sampleCoverage(1.0, false);
         
         //depth (test)
         opengles.enable(opengles.DEPTH_TEST);
         opengles.depthFunc(opengles.LESS);
         
         //enable, and set cull face; dont rely on default setting
-        opengles.enable(opengles.CULL_FACE);
-        opengles.cullFace(opengles.BACK);
+        opengles.disable(opengles.CULL_FACE);
+        //opengles.cullFace(opengles.BACK);
         
         //compile and thus have anticipated shaders ready.
         solid_color_vertex_shader = opengles.createShader(opengles.VERTEX_SHADER);
@@ -170,7 +182,7 @@
        
        
          //render frame loop
-         render_frame_interval = (1000 / 120); //target frame per second, 1000 milliseconds divided by target frame rate;
+         render_frame_interval = (1000 / 30); //target frame per second, 1000 milliseconds divided by target frame rate;
          let syncronized_timestamp = Date.now();
          render_frame_last_rendered_timestamp = syncronized_timestamp;
          tick_game_conditions_last_tick_timestamp = syncronized_timestamp;
@@ -181,20 +193,23 @@
       tick_game_conditions = function()
       {
         let timepassed_since_last_game_tick = Date.now() - tick_game_conditions_last_tick_timestamp;
-        if(timepassed_since_last_game_tick <= 0)
-        {
-          timepassed_since_last_game_tick = 1;
+        if(timepassed_since_last_game_tick >= 1)
+        { 
+          triangle_and_color_metadata.rotation.x += (timepassed_since_last_game_tick*0.005);
+          triangle_and_color_metadata.rotation.y += (timepassed_since_last_game_tick*0.0009);
+          triangle_and_color_metadata.rotation.z += (timepassed_since_last_game_tick*0.0009);
+          
+          //update tick_game_conditions_last_tick_timestamp
+          tick_game_conditions_last_tick_timestamp = Date.now();
+        
         }
-        triangle_and_color_metadata.rotation.x += (timepassed_since_last_game_tick*0.005);;
         
         //flag frame to render(function will decide if its time for sure).
         render_frame();
       
-        //update tick_game_conditions_last_tick_timestamp
-        tick_game_conditions_last_tick_timestamp = Date.now();
-        
+       
         //continue loop.
-        setTimeout(tick_game_conditions, 1);
+        setTimeout(tick_game_conditions, 1);;
       }
       
       render_frame = function()
@@ -205,8 +220,7 @@
         
         if(time_passed_since_last_render >= render_frame_interval)
         {
-         render_frame_last_rendered_timestamp = Date.now();
-        
+          console.log(time_passed_since_last_render);
           //Clear the viewport(screen) before drawing a new frame. (you will always do it this way, the only rare times you will add on to an already drawn frame is maybe an Operating System window(or UI) that goes on top of everything else and usually only when there is no alpha or moving objects).
          opengles.clearColor(0.0, 0.0, 0.0, 1.0);
          opengles.viewport(0, 0, opengles.viewportWidth, opengles.viewportHeight);
@@ -215,10 +229,11 @@
          //draw multi colored triangle
          let triangle_vertex_manipulated = new Float32Array(triangle_vertex);
          
-        triangle_vertex_manipulated =  render_frame_translate_rotation_x(triangle_vertex_manipulated, triangle_total_rows, triangle_and_color_metadata.rotation.x);
+         triangle_vertex_manipulated =  render_frame_translate_rotation_x(triangle_vertex_manipulated, triangle_total_rows, triangle_and_color_metadata.rotation.x);
+         triangle_vertex_manipulated =  render_frame_translate_rotation_y(triangle_vertex_manipulated, triangle_total_rows, triangle_and_color_metadata.rotation.y);
+         triangle_vertex_manipulated =  render_frame_translate_rotation_z(triangle_vertex_manipulated, triangle_total_rows, triangle_and_color_metadata.rotation.z);
       
-        // triangle_vertex_manipulated = render_frame_translate_position(triangle_vertex_manipulated, triangle_total_rows, triangle_and_color_metadata.position.x, triangle_and_color_metadata.position.y, triangle_and_color_metadata.position.z);
-      
+       
          triangle_and_rgba_color_vertex_manipulated = combine_vertex_and_rgba_color(triangle_vertex_manipulated, triangle_rgba_color, triangle_total_rows);
         
          triangle_vertex_opengles = opengles.createBuffer();
@@ -230,7 +245,7 @@
             
          triangle_vertex_opengles.numberOfItems = triangle_total_rows;
 
-         opengles.bindBuffer(opengles.ARRAY_BUFFER, triangle_vertex_opengles);
+       //  opengles.bindBuffer(opengles.ARRAY_BUFFER, triangle_vertex_opengles);
             
             
          //draw
@@ -250,8 +265,12 @@
         
          opengles.drawArrays(opengles.TRIANGLES, 0, triangle_vertex_opengles.numberOfItems);
         
+         //cleanup
+         opengles.deleteBuffer(triangle_vertex_opengles);
+         triangle_vertex_opengles = null;
         
-   
+         render_frame_last_rendered_timestamp = Date.now();
+        
         }
       }
       
@@ -288,7 +307,7 @@
         let row = 0;
         while(row < total_rows_within_vertex)
         {
-          //point two z and y.
+          //point two x and y.
           let point_two_z = output[vertex_index+2];
           let point_two_y = output[vertex_index+1];
           
@@ -313,6 +332,81 @@
          
         return output;
       }
+      
+       //translate rotation y
+      render_frame_translate_rotation_y = function(vertex_to_translate_rotation_thereof, total_rows_within_vertex, offset_y_rotation)
+      {
+        let output = new Float32Array(vertex_to_translate_rotation_thereof);
+        
+        //only support top right starting position(this is closest to the "camera" and to the right).
+        
+        let vertex_index = 0;
+        let row = 0;
+        while(row < total_rows_within_vertex)
+        {
+          //point two x and y.
+          let point_two_z = output[vertex_index+2];
+          let point_two_x = output[vertex_index];
+          
+          //pythagerom therom
+          let adjacent_opposite_hypotenus = get_two_dimensional_adjacent_opposite_hypotenus(0, 0, point_two_z, point_two_x);
+        
+          //determine angle
+          let three_hundred_and_sixty_degrees_as_radians = get_two_dimensional_angle_as_radians(adjacent_opposite_hypotenus.adjacent, adjacent_opposite_hypotenus.hypotenus, 0, 0, point_two_z, point_two_x);
+      
+          //apply desired rotation
+          let rotated_point = get_two_dimensional_apply_desired_rotation(three_hundred_and_sixty_degrees_as_radians, offset_y_rotation, adjacent_opposite_hypotenus.hypotenus);
+      
+          
+          
+          output[vertex_index+2] = rotated_point.rotated_x;
+          output[vertex_index] = rotated_point.rotated_y;
+          
+          //next row
+          vertex_index = vertex_index + 3;
+          row = row + 1;
+        }
+         
+        return output;
+      }
+      
+      //translate rotation z
+      render_frame_translate_rotation_z = function(vertex_to_translate_rotation_thereof, total_rows_within_vertex, offset_z_rotation)
+      {
+        let output = new Float32Array(vertex_to_translate_rotation_thereof);
+        
+        //only support top right starting position(this is closest to the "camera" and to the right).
+        
+        let vertex_index = 0;
+        let row = 0;
+        while(row < total_rows_within_vertex)
+        {
+          //point two x and y.
+          let point_two_x = output[vertex_index];
+          let point_two_y = output[vertex_index+1];
+          
+          //pythagerom therom
+          let adjacent_opposite_hypotenus = get_two_dimensional_adjacent_opposite_hypotenus(0, 0, point_two_x, point_two_y);
+        
+          //determine angle
+          let three_hundred_and_sixty_degrees_as_radians = get_two_dimensional_angle_as_radians(adjacent_opposite_hypotenus.adjacent, adjacent_opposite_hypotenus.hypotenus, 0, 0, point_two_x, point_two_y);
+      
+          //apply desired rotation
+          let rotated_point = get_two_dimensional_apply_desired_rotation(three_hundred_and_sixty_degrees_as_radians, offset_z_rotation, adjacent_opposite_hypotenus.hypotenus);
+      
+          
+          
+          output[vertex_index] = rotated_point.rotated_x;
+          output[vertex_index+1] = rotated_point.rotated_y;
+          
+          //next row
+          vertex_index = vertex_index + 3;
+          row = row + 1;
+        }
+         
+        return output;
+      }
+      
       
       //translate rotation assistant
       get_two_dimensional_adjacent_opposite_hypotenus = function(point_one_x, point_one_y, point_two_x, point_two_y)
