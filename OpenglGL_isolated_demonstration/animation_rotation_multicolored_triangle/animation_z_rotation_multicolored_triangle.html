@@ -3,8 +3,7 @@
   <head>
     <title>Adventure Game</title>
     <script type="text/javascript">
-      //constant variables
-      var math_pi = 3.141592;
+      /* Venmo: Shane-Betz1990 */
       
       //open gl
       var canvas_handle = null;
@@ -32,8 +31,7 @@
                                             "scale": {  "x": 1.000000, "y": 1.000000, "z": 1.000000 },
                                            };
         var triangle_and_rgba_color_vertex_manipulated = null;
-                                             
-                                            
+                      
         
       //functions (header)
         //start main program
@@ -48,29 +46,19 @@
         var render_frame_interval = null;
         var render_frame_last_rendered_timestamp = null;
         
-        //get hypotenus.
-        var get_two_dimensional_hypotenus = null;
-        
-        //get angle as radians
-        var get_two_dimensional_angle_as_radians = null;
-        
-        //apply rotation to points
-        var get_two_dimensional_rotated_points = null;
-        
-        //vertex manipulation
-          //rotation
-            //x
-            
-            //y
-            
-            //z axis
-            var vertex_manipulation_rotate_z_axis = null;
-            
-          //scale
-          
-          //position
+          //render position translation.
+          var render_frame_translate_position = null;
       
-      /* Venmo: Shane-Betz1990 */
+          //render rotation translation.
+            //z
+            var render_frame_translate_rotation_z = null;
+            
+            //rotation assistant.
+            var get_two_dimensional_adjacent_opposite_hypotenus = null;
+            var get_two_dimensional_angle_as_radians = null;
+            var get_two_dimensional_apply_desired_rotation = null;
+            
+      //define functions.
       combine_vertex_and_rgba_color = function(vertex, rgba_color, total_rows)
       {
         let size_of_vertex_and_color_rgba = ((3+4)*total_rows);
@@ -100,21 +88,23 @@
         return vertex_and_color_rgba;
       }
       
-      
       start_render = function()
       {
+      
         //open gl
         canvas_handle = document.getElementById("canvas_for_opengles");
         
-        opengles = canvas_handle.getContext("webgl2", {
-                                                        antialias: false,
-                                                        depth: true,
-                                                        desynchronized: true,
-                                                        powerPreference: "high-performance",
-                                                        preserveDrawingBuffer: true
-                                                      });
+        opengles = canvas_handle.getContext("webgl2");
         opengles.viewportWidth = canvas_handle.width;
         opengles.viewportHeight = canvas_handle.height;
+        
+        //depth (test)
+        opengles.enable(opengles.DEPTH_TEST);
+        opengles.depthFunc(opengles.LESS);
+        
+        //enable, and set cull face; dont rely on default setting
+        opengles.enable(opengles.CULL_FACE);
+        opengles.cullFace(opengles.BACK);
         
         //compile and thus have anticipated shaders ready.
         solid_color_vertex_shader = opengles.createShader(opengles.VERTEX_SHADER);
@@ -155,17 +145,15 @@
           alert("shader link process failed.");
         }
        
-        //define triangle vertex.
-         triangle_vertex = new Float32Array([
-                                              1.0, 1.0, 0.0, 
-                                              -1.0, 1.0, 0.0,
-                                              -1.0, -1.0, 0.0,
-                                              
-                                              1.0, 1.0, 0.0,
-                                              -1.0, -1.0, 0.0,
-                                              1.0, -1.0, 0.0
+       //define triangle vertex.
+       triangle_vertex = new Float32Array([
+                                              1.0, -0.1, -0.5,
+                                              0.000001, -0.1, -0.5,
+                                              0.5, -0.2, -0.000001
                                              ]);
-         triangle_rgba_color = new Float32Array([
+                                             
+                                             
+       triangle_rgba_color = new Float32Array([
                                                   1.0, 0.0, 0.0, 1.0,
                                                   0.0, 1.0, 0.0, 1.0,
                                                   0.0, 0.0, 1.0, 1.0,
@@ -173,24 +161,38 @@
                                                   1.0, 0.0, 0.0, 1.0,
                                                   0.0, 1.0, 0.0, 1.0,
                                                   0.0, 0.0, 1.0, 1.0
+                                                  
+                                                  
                                                 ]);       
-         triangle_total_rows = 6;
+       triangle_total_rows = 3;
          
          
-        
+       
+       
          //render frame loop
-         render_frame_interval = (1000 / 30); //target frame per second, 1000 milliseconds divided by target frame rate;
-         render_frame_last_rendered_timestamp = Date.now();
+         render_frame_interval = (1000 / 120); //target frame per second, 1000 milliseconds divided by target frame rate;
+         let syncronized_timestamp = Date.now();
+         render_frame_last_rendered_timestamp = syncronized_timestamp;
+         tick_game_conditions_last_tick_timestamp = syncronized_timestamp;
          tick_game_conditions();
         
       }
       
       tick_game_conditions = function()
       {
-      
+        let timepassed_since_last_game_tick = Date.now() - tick_game_conditions_last_tick_timestamp;
+        if(timepassed_since_last_game_tick >= 1)
+        { 
+          triangle_and_color_metadata.rotation.z += (timepassed_since_last_game_tick*0.005);
+        }
         
+        //flag frame to render(function will decide if its time for sure).
         render_frame();
       
+        //update tick_game_conditions_last_tick_timestamp
+        tick_game_conditions_last_tick_timestamp = Date.now();
+        
+        //continue loop.
         setTimeout(tick_game_conditions, 1);
       }
       
@@ -204,19 +206,16 @@
         {
          render_frame_last_rendered_timestamp = Date.now();
         
-        
-         //Clear the viewport(screen) before drawing a new frame. (you will always do it this way, the only rare times you will add on to an already drawn frame is maybe an Operating System window(or UI) that goes on top of everything else and usually only when there is no alpha or moving objects).
+          //Clear the viewport(screen) before drawing a new frame. (you will always do it this way, the only rare times you will add on to an already drawn frame is maybe an Operating System window(or UI) that goes on top of everything else and usually only when there is no alpha or moving objects).
          opengles.clearColor(0.0, 0.0, 0.0, 1.0);
          opengles.viewport(0, 0, opengles.viewportWidth, opengles.viewportHeight);
          opengles.clear(opengles.COLOR_BUFFER_BIT);
         
          //draw multi colored triangle
-         triangle_and_color_metadata.rotation.z += 0.05;
-         
          let triangle_vertex_manipulated = new Float32Array(triangle_vertex);
          
-   
-         triangle_vertex_manipulated = vertex_manipulation_rotate_z_axis(triangle_vertex_manipulated, triangle_total_rows, triangle_and_color_metadata.rotation.z, 0, 1);
+         triangle_vertex_manipulated =  render_frame_translate_rotation_z(triangle_vertex_manipulated, triangle_total_rows, triangle_and_color_metadata.rotation.z);
+      
        
          triangle_and_rgba_color_vertex_manipulated = combine_vertex_and_rgba_color(triangle_vertex_manipulated, triangle_rgba_color, triangle_total_rows);
         
@@ -249,63 +248,113 @@
         
          opengles.drawArrays(opengles.TRIANGLES, 0, triangle_vertex_opengles.numberOfItems);
         
+        
+   
         }
       }
       
-      get_two_dimensional_hypotenus = function(point_one_x, point_one_y, point_two_x, point_two_y)
+      //translate position.
+      render_frame_translate_position = function(vertex_to_translate_position_thereof, total_rows_within_vertex, offset_x, offset_y, offset_z)
       {
-        let pythagorean_therom_data = {
-                          "adjacent": 0.000000,
-                          "opposite": 0.000000,
-                          "hypotenus": 0.000000
-                        };
+        let manipulated_vertex = new Float32Array(vertex_to_translate_position_thereof);
         
-        //determine adjacent squared.
-          //determine adjacent over an infinite, non oriented line.
-          let adjacent = point_one_x - point_two_x;
-             
-              //determine the absolute value. (checking if absolute value is needed everytime would cause a variance time to deliver(variable lag), so instead it is determined every time to produce constant time CPU delivery.)
-              adjacent = Math.abs(adjacent);
-              
+        let manipulated_vertex_index = 0;
+        let row_index = 0;
+        while(row_index < total_rows_within_vertex)
+        {
+          manipulated_vertex[manipulated_vertex_index] = manipulated_vertex[manipulated_vertex_index]+offset_x;
+          manipulated_vertex[manipulated_vertex_index+1] = manipulated_vertex[manipulated_vertex_index+1]+offset_y;
+          manipulated_vertex[manipulated_vertex_index+2] = manipulated_vertex[manipulated_vertex_index+2]+offset_z;
+          
+          //next row.
+          manipulated_vertex_index = manipulated_vertex_index + 3;
+          row_index = row_index + 1;
+        }
+        
+        //output
+        return manipulated_vertex;
+      }
+      
+      //translate rotation x
+      render_frame_translate_rotation_z = function(vertex_to_translate_rotation_thereof, total_rows_within_vertex, offset_z_rotation)
+      {
+        let output = new Float32Array(vertex_to_translate_rotation_thereof);
+        
+        //only support top right starting position(this is closest to the "camera" and to the right).
+        
+        let vertex_index = 0;
+        let row = 0;
+        while(row < total_rows_within_vertex)
+        {
+          //point two x and y.
+          let point_two_x = output[vertex_index];
+          let point_two_y = output[vertex_index+1];
+          
+          //pythagerom therom
+          let adjacent_opposite_hypotenus = get_two_dimensional_adjacent_opposite_hypotenus(0, 0, point_two_x, point_two_y);
+        
+          //determine angle
+          let three_hundred_and_sixty_degrees_as_radians = get_two_dimensional_angle_as_radians(adjacent_opposite_hypotenus.adjacent, adjacent_opposite_hypotenus.hypotenus, 0, 0, point_two_x, point_two_y);
+      
+          //apply desired rotation
+          let rotated_point = get_two_dimensional_apply_desired_rotation(three_hundred_and_sixty_degrees_as_radians, offset_z_rotation, adjacent_opposite_hypotenus.hypotenus);
+      
+          
+          
+          output[vertex_index] = rotated_point.rotated_x;
+          output[vertex_index+1] = rotated_point.rotated_y;
+          
+          //next row
+          vertex_index = vertex_index + 3;
+          row = row + 1;
+        }
+         
+        return output;
+      }
+      
+      //translate rotation assistant
+      get_two_dimensional_adjacent_opposite_hypotenus = function(point_one_x, point_one_y, point_two_x, point_two_y)
+      {
+        let output = { "adjacent": 0.000001,
+                       "opposite": 0.000001,
+                       "hypotenus": 0.000001
+                     };
+      
+      
+        let adjacent = point_one_x - point_two_x; 
+            adjacent = Math.abs(adjacent);
               
         let adjacent_squared = Math.pow(adjacent, 2);
-             
-        //determine opposite squared.
-          //determine opposite over an infinite, non oriented line.
-          let opposite = point_one_y - point_two_y;
-              
-              //determine the absolute value. (checking if absolute value is needed everytime would cause a variance time to deliver(variable lag), so instead it is determined every time to produce constant time CPU delivery.)
-              opposite = Math.abs(opposite);
+          
+        ////
+        let opposite = point_one_y - point_two_y;
+            opposite = Math.abs(opposite);
               
         let opposite_squared = Math.pow(opposite, 2);
-        
-        //determine hypotenus on an infinite grid that is locally oriented only by its two side(hypotenuse and opposite).
-        if((adjacent*1000000) == 0)
+          
+        ///ensure adjacent and opposite are not absolute zero.
+        if((adjacent * 1000000) == 0)
         {
           adjacent = 0.000001;
         }
-        
-        if((opposite*1000000) == 0)
+          
+        if((opposite * 1000000) == 0)
         {
           opposite = 0.000001;
         }
-      
+          
         let a_squared_plus_b_squared = adjacent_squared + opposite_squared;
-        hypotenus = Math.sqrt(a_squared_plus_b_squared);
+        let hypotenus = Math.sqrt(a_squared_plus_b_squared);
         
         
-        pythagorean_therom_data.adjacent = adjacent;
-        pythagorean_therom_data.opposite = opposite;
-        pythagorean_therom_data.hypotenus = hypotenus;
-       
-       
-        //return pythagorean_therom_data
-        return pythagorean_therom_data;
+        output.adjacent = adjacent;
+        output.opposite = opposite;
+        output.hypotenus = hypotenus;
+        
+        return output;
       }
       
       
-      
-      //get angle as radians
       get_two_dimensional_angle_as_radians = function(adjacent, hypotenus, point_one_x, point_one_y, point_two_x, point_two_y)
       {
         let angle_as_radians = undefined;
@@ -425,73 +474,30 @@
         return angle_as_radians;
       }
       
-      //apply rotation to points.
-      get_two_dimensional_rotated_points = function(hypotenus, current_angle_as_radians, amount_of_rotation_to_apply_in_radians)
+      
+      get_two_dimensional_apply_desired_rotation = function(current_angle_as_radians, offset_angle_as_radians, hypotenus)
       {
-        let rotated_points = {
-                                "rotated_x": 0.000000,
-                                "rotated_y": 0.000000
-                              };
-                              
-       //apply rotation
-       let rotated_angle = 0.000000;
-       rotated_angle += current_angle_as_radians;
-       rotated_angle += amount_of_rotation_to_apply_in_radians;
- 
- 
-        //calculate rotated points
-        rotated_points.rotated_x = hypotenus * Math.cos(rotated_angle);
-        rotated_points.rotated_y = hypotenus * Math.sin(rotated_angle);
-      
-        return rotated_points;
+        let output = { "rotated_x": 0.000000,
+                       "rotated_y": 0.000000
+                     };
+         
+        let rotated_angle = 0.000000;
+            rotated_angle += current_angle_as_radians;
+            rotated_angle += offset_angle_as_radians;
+          
+        
+        let rotated_x = hypotenus * Math.cos(rotated_angle);
+        let rotated_y = hypotenus * Math.sin(rotated_angle);
+        
+        
+        output.rotated_x = rotated_x;
+        output.rotated_y = rotated_y;
+        
+        return output;
       }
-      
-      
-      
-      //vertex manipulation
-        //z axis rotation
-        vertex_manipulation_rotate_z_axis = function(vertex_to_manipulate, total_rows, z_degrees_to_apply, plane_one_index, plane_two_index)
-        {
-          let manipulated_z_vertex = new Float32Array(vertex_to_manipulate);
-        
-          if(z_degrees_to_apply*1000000 != 0)
-          {
-        
-            //convert degrees to raidians.
-            let amount_of_rotation_to_apply_in_radians = ((z_degrees_to_apply * math_pi) / 180.000000);
-          
-            let vertex_to_manipulate_index = 0;
-            let row = 0;
-            while(row < total_rows)
-            {
-              let point_to_rotate_x = manipulated_z_vertex[vertex_to_manipulate_index+plane_one_index];
-              let point_to_rotate_y = manipulated_z_vertex[vertex_to_manipulate_index+plane_two_index];
-              
-            
-              //
-              let hypotenus_adjacent_opposite_x_y = get_two_dimensional_hypotenus(0, 0, point_to_rotate_x, point_to_rotate_y);
-              let angle_as_radians_x_y = get_two_dimensional_angle_as_radians(hypotenus_adjacent_opposite_x_y.adjacent, hypotenus_adjacent_opposite_x_y.hypotenus, 0, 0, point_to_rotate_x, point_to_rotate_y);
-              let rotated_points_x_y = get_two_dimensional_rotated_points(hypotenus_adjacent_opposite_x_y.hypotenus, angle_as_radians_x_y, z_degrees_to_apply);
-         
-              manipulated_z_vertex[vertex_to_manipulate_index+plane_one_index] = rotated_points_x_y.rotated_x;
-              manipulated_z_vertex[vertex_to_manipulate_index+plane_two_index] = rotated_points_x_y.rotated_y;
-         
-              
-              //next row
-              vertex_to_manipulate_index = vertex_to_manipulate_index + 3;
-              row = row + 1;
-            }
-          }
-          
-          return manipulated_z_vertex;
-        }
-        
-        
-        
-        
     </script>
   </head>
   <body onLoad="start_render();">
-    <canvas id="canvas_for_opengles" width="800" height="800"></canvas>
+    <canvas id="canvas_for_opengles" width="500" height="500"></canvas>
   </body>
 </html>
