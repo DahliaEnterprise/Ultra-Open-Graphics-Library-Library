@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html>
   <head>
@@ -52,7 +53,10 @@
           //render rotation translation.
             //y
             var render_frame_translate_rotation_y = null;
-            var get_two_dimensional_z_x_angle_as_radians = null;
+            
+            //rotation assistant.
+            var get_two_dimensional_adjacent_opposite_hypotenus = null;
+            var get_two_dimensional_angle_as_radians = null;
       combine_vertex_and_rgba_color = function(vertex, rgba_color, total_rows)
       {
         let size_of_vertex_and_color_rgba = ((3+4)*total_rows);
@@ -278,43 +282,19 @@
           
           
           ////
-          let adjacent = 0 - point_two_z; //center/point_one_z
-              adjacent = Math.abs(adjacent);
-              
-          let adjacent_squared = Math.pow(adjacent, 2);
           
-          ////
-          let opposite = 0 - point_two_x;
-              opposite = Math.abs(opposite);
-              
-          let opposite_squared = Math.pow(opposite, 2);
-          
-          ///ensure adjacent and opposite are not absolute zero.
-          if((adjacent * 1000000) == 0)
-          {
-            adjacent = 0.000001;
-          }
-          
-          if((opposite * 1000000) == 0)
-          {
-            opposite = 0.000001;
-          }
-          
-          let a_squared_plus_b_squared = adjacent_squared + opposite_squared;
-          let hypotenus = Math.sqrt(a_squared_plus_b_squared);
+          let adjacent_opposite_hypotenus = get_two_dimensional_adjacent_opposite_hypotenus(0, 0, point_two_z, point_two_x);
         
           //// ////
-          //compensate according to quadrant here.
-          //let three_hundred_and_sixty_degrees_as_radians = Math.acos(adjacent / hypotenus);
-          let three_hundred_and_sixty_degrees_as_radians = get_two_dimensional_angle_as_radians(adjacent, hypotenus, 0, 0, point_two_z, point_two_x);
+          let three_hundred_and_sixty_degrees_as_radians = get_two_dimensional_angle_as_radians(adjacent_opposite_hypotenus.adjacent, adjacent_opposite_hypotenus.hypotenus, 0, 0, point_two_z, point_two_x);
       
           //// ////
           let rotated_angle = 0.000000;
               rotated_angle += three_hundred_and_sixty_degrees_as_radians;
               rotated_angle += offset_y_rotation;
           
-          let rotated_z = hypotenus * Math.cos(rotated_angle);
-          let rotated_x = hypotenus * Math.sin(rotated_angle);
+          let rotated_z = adjacent_opposite_hypotenus.hypotenus * Math.cos(rotated_angle);
+          let rotated_x = adjacent_opposite_hypotenus.hypotenus * Math.sin(rotated_angle);
           
           output[vertex_index+2] = rotated_z;
           output[vertex_index] = rotated_x;
@@ -326,6 +306,49 @@
          
         return output;
       }
+      
+      //translate rotation assistant
+      get_two_dimensional_adjacent_opposite_hypotenus = function(point_one_x, point_one_y, point_two_x, point_two_y)
+      {
+        let output = { "adjacent": 0.000001,
+                       "opposite": 0.000001,
+                       "hypotenus": 0.000001
+                     };
+      
+      
+        let adjacent = point_one_x - point_two_x; 
+            adjacent = Math.abs(adjacent);
+              
+        let adjacent_squared = Math.pow(adjacent, 2);
+          
+        ////
+        let opposite = point_one_y - point_two_y;
+            opposite = Math.abs(opposite);
+              
+        let opposite_squared = Math.pow(opposite, 2);
+          
+        ///ensure adjacent and opposite are not absolute zero.
+        if((adjacent * 1000000) == 0)
+        {
+          adjacent = 0.000001;
+        }
+          
+        if((opposite * 1000000) == 0)
+        {
+          opposite = 0.000001;
+        }
+          
+        let a_squared_plus_b_squared = adjacent_squared + opposite_squared;
+        let hypotenus = Math.sqrt(a_squared_plus_b_squared);
+        
+        
+        output.adjacent = adjacent;
+        output.opposite = opposite;
+        output.hypotenus = hypotenus;
+        
+        return output;
+      }
+      
       
       get_two_dimensional_angle_as_radians = function(adjacent, hypotenus, point_one_x, point_one_y, point_two_x, point_two_y)
       {
