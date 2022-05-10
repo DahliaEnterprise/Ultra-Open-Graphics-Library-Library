@@ -198,7 +198,7 @@
          //draw multi colored triangle
          let triangle_vertex_manipulated = new Float32Array(triangle_vertex);
          
-         render_frame_translate_rotation_y(triangle_vertex_manipulated, triangle_total_rows, triangle_and_color_metadata.rotation.y);
+        triangle_vertex_manipulated =  render_frame_translate_rotation_y(triangle_vertex_manipulated, triangle_total_rows, triangle_and_color_metadata.rotation.y);
       
         // triangle_vertex_manipulated = render_frame_translate_position(triangle_vertex_manipulated, triangle_total_rows, triangle_and_color_metadata.position.x, triangle_and_color_metadata.position.y, triangle_and_color_metadata.position.z);
       
@@ -305,9 +305,7 @@
           
           let rotated_z = hypotenus * Math.cos(rotated_angle);
           let rotated_x = hypotenus * Math.sin(rotated_angle);
-          console.log(point_two_z);
-          console.log(rotated_z);
-          console.log(" ");
+          
           output[vertex_index+2] = rotated_z;
           output[vertex_index] = rotated_x;
           
