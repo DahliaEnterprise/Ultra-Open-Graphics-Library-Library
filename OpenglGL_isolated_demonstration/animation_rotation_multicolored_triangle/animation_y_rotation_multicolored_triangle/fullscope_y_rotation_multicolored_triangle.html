@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html>
   <head>
@@ -57,6 +56,9 @@
             //rotation assistant.
             var get_two_dimensional_adjacent_opposite_hypotenus = null;
             var get_two_dimensional_angle_as_radians = null;
+            
+            
+      //define functions.
       combine_vertex_and_rgba_color = function(vertex, rgba_color, total_rows)
       {
         let size_of_vertex_and_color_rgba = ((3+4)*total_rows);
@@ -88,7 +90,7 @@
       
       start_render = function()
       {
-      console.log("start render");
+      
         //open gl
         canvas_handle = document.getElementById("canvas_for_opengles");
         
@@ -168,19 +170,30 @@
        
        
          //render frame loop
-         render_frame_interval = (1000 / 30); //target frame per second, 1000 milliseconds divided by target frame rate;
-         render_frame_last_rendered_timestamp = Date.now();
+         render_frame_interval = (1000 / 120); //target frame per second, 1000 milliseconds divided by target frame rate;
+         let syncronized_timestamp = Date.now();
+         render_frame_last_rendered_timestamp = syncronized_timestamp;
+         tick_game_conditions_last_tick_timestamp = syncronized_timestamp;
          tick_game_conditions();
         
       }
       
       tick_game_conditions = function()
       {
-        triangle_and_color_metadata.rotation.y += 0.01;
+        let timepassed_since_last_game_tick = Date.now() - tick_game_conditions_last_tick_timestamp;
+        if(timepassed_since_last_game_tick <= 0)
+        {
+          timepassed_since_last_game_tick = 1;
+        }
+        triangle_and_color_metadata.rotation.y += (timepassed_since_last_game_tick*0.005);;
         
         //flag frame to render(function will decide if its time for sure).
         render_frame();
       
+        //update tick_game_conditions_last_tick_timestamp
+        tick_game_conditions_last_tick_timestamp = Date.now();
+        
+        //continue loop.
         setTimeout(tick_game_conditions, 1);
       }
       
@@ -279,25 +292,19 @@
           let point_two_z = output[vertex_index+2];
           let point_two_x = output[vertex_index];
           
-          
-          
-          ////
-          
+          //pythagerom therom
           let adjacent_opposite_hypotenus = get_two_dimensional_adjacent_opposite_hypotenus(0, 0, point_two_z, point_two_x);
         
-          //// ////
+          //determine angle
           let three_hundred_and_sixty_degrees_as_radians = get_two_dimensional_angle_as_radians(adjacent_opposite_hypotenus.adjacent, adjacent_opposite_hypotenus.hypotenus, 0, 0, point_two_z, point_two_x);
       
-          //// ////
-          let rotated_angle = 0.000000;
-              rotated_angle += three_hundred_and_sixty_degrees_as_radians;
-              rotated_angle += offset_y_rotation;
+          //apply desired rotation
+          let rotated_point = get_two_dimensional_apply_desired_rotation(three_hundred_and_sixty_degrees_as_radians, offset_y_rotation, adjacent_opposite_hypotenus.hypotenus)
+      
           
-          let rotated_z = adjacent_opposite_hypotenus.hypotenus * Math.cos(rotated_angle);
-          let rotated_x = adjacent_opposite_hypotenus.hypotenus * Math.sin(rotated_angle);
           
-          output[vertex_index+2] = rotated_z;
-          output[vertex_index] = rotated_x;
+          output[vertex_index+2] = rotated_point.rotated_x;
+          output[vertex_index] = rotated_point.rotated_y;
           
           //next row
           vertex_index = vertex_index + 3;
@@ -469,6 +476,27 @@
         return angle_as_radians;
       }
       
+      
+      get_two_dimensional_apply_desired_rotation = function(current_angle_as_radians, offset_angle_as_radians, hypotenus)
+      {
+        let output = { "rotated_x": 0.000000,
+                       "rotated_y": 0.000000
+                     };
+         
+        let rotated_angle = 0.000000;
+            rotated_angle += current_angle_as_radians;
+            rotated_angle += offset_angle_as_radians;
+          
+        
+        let rotated_x = hypotenus * Math.cos(rotated_angle);
+        let rotated_y = hypotenus * Math.sin(rotated_angle);
+        
+        
+        output.rotated_x = rotated_x;
+        output.rotated_y = rotated_y;
+        
+        return output;
+      }
     </script>
   </head>
   <body onLoad="start_render();">
