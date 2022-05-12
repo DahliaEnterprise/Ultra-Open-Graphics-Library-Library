@@ -254,11 +254,19 @@
             let three_hundred_and_sixty_degrees_as_radians_y = get_two_dimensional_angle_as_radians(adjacent_opposite_hypotenus_y.adjacent, adjacent_opposite_hypotenus_y.hypotenus, 0, 0, coordinate_to_point_triangle.z, coordinate_to_point_triangle.x);
       
             //set y rotation to point at coordinate
-            triangle_and_color_metadata.rotation.y = 0-three_hundred_and_sixty_degrees_as_radians_y;
+            triangle_and_color_metadata.rotation.y = three_hundred_and_sixty_degrees_as_radians_y;
+          
+          //determine x rotation.
+            //pythagerom therom
+            let adjacent_opposite_hypotenus_x = get_two_dimensional_adjacent_opposite_hypotenus(0, 0, coordinate_to_point_triangle.z, coordinate_to_point_triangle.y);
+        
+            //determine angle
+            let three_hundred_and_sixty_degrees_as_radians_x  = get_two_dimensional_angle_as_radians(adjacent_opposite_hypotenus_y.adjacent, adjacent_opposite_hypotenus_y.hypotenus, 0, 0, coordinate_to_point_triangle.z, coordinate_to_point_triangle.y);
+      
+            //set x rotation to point at coordinate
+            triangle_and_color_metadata.rotation.x  = three_hundred_and_sixty_degrees_as_radians_x;
           
         
-          triangle_and_color_metadata.rotation.x = 0.005;
-          //triangle_and_color_metadata.rotation.y -= 0.009;
           
           //update tick_game_conditions_last_tick_timestamp
           tick_game_conditions_last_tick_timestamp = Date.now();
@@ -275,6 +283,7 @@
       
       render_frame = function()
       {
+        
         //determine when to begin render next frame.
         let current_timestamp_millisecond_format = Date.now();
         let time_passed_since_last_render = current_timestamp_millisecond_format - render_frame_last_rendered_timestamp;
@@ -331,6 +340,7 @@
          opengles.deleteBuffer(triangle_vertex_opengles);
          triangle_vertex_opengles = null;
         
+      
          render_frame_last_rendered_timestamp = Date.now();
         
         }
