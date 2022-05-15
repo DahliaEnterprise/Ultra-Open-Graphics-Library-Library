@@ -6,8 +6,10 @@
       /* Venmo: Shane-Betz1990 */
       
 			//image element download manager
-			var xhr_request = null;
-			var xhr_request_status_loaded = null;
+			var image_element_download_xhr_status = 0;
+			var image_element_download_xhr_request = null;
+			var image_element_download_xhr_request_status_loaded = null;
+			var image_element_download_xhr_request_reponse_data = null;
 			
       //open gl
       var canvas_handle = null;
@@ -80,12 +82,23 @@
           //vanishing point.
           var alter_coordinate_for_vanishing_point_compensation = null;
          
-        
+      //scene manager
+			var scene_prestage_scene = null;
+			var scene_major_scene = null;
+			var scene_minor_scene = null;
+			
+			  //scene major one
+				var tick_scene_major_one = null;
+				  //image elements.
+					var scene_major_one_minor_one_image_elements = [];
+					 
         
       //define functions.
-			xhr_request_status_loaded = function(event)
+			image_element_download_xhr_request_status_loaded = function(event)
 			{
-				console.log(xhr_request.responseText);
+				image_element_download_xhr_status = 2;
+				image_element_download_xhr_request_reponse_data = image_element_download_xhr_request.response;
+				console.log(image_element_download_xhr_request_reponse_data);
 			}
 			
       combine_vertex_and_rgba_color = function(vertex, rgba_color, total_rows)
@@ -123,10 +136,6 @@
 			
       start_render = function()
       {
-				xhr_request = new XMLHttpRequest();
-				xhr_request.addEventListener("load", xhr_request_status_loaded, true);
-        xhr_request.open("GET", "http://shastaexchange.com/webgl/test.txt");
-				xhr_request.send();
 				
         //open gl
         canvas_handle = document.getElementById("canvas_for_opengles");
@@ -261,6 +270,12 @@
 																					-1.0, -1.0, 0.0,
 																					1.0, -1.0, 0.0
 			                                  ]);
+																				
+			 //set scene parameters to initial/zero
+			 scene_prestage_scene = 1;
+			 scene_major_scene = 1;
+			 scene_minor_scene = 1;
+			
        
     
        //render frame loop
@@ -277,9 +292,12 @@
         let timepassed_since_last_game_tick = Date.now() - tick_game_conditions_last_tick_timestamp;
         if(timepassed_since_last_game_tick >= 1)
         { 
-          triangle_metadata.rotation.y -= 0.01;
-          triangle_metadata.rotation.z -= 0.02;
-          triangle_metadata.rotation.x -= 0.05;
+					if(scene_major_scene == 1)
+					{
+						tick_scene_major_one(timepassed_since_last_game_tick);
+					}
+					
+					
           //update tick_game_conditions_last_tick_timestamp
           tick_game_conditions_last_tick_timestamp = Date.now();
         
@@ -291,7 +309,7 @@
         
       
         //continue loop.
-        setTimeout(tick_game_conditions, 2);
+        setTimeout(tick_game_conditions, 1);
       }
       
       
@@ -726,9 +744,50 @@
         return output;
       }
       
+			
+			//scene
+			  //major scene one
+				tick_scene_major_one = function(timepassed_since_last_game_tick)
+				{
+					//minor scene one
+					if(scene_minor_scene == 1)
+					{
+						//prestage
+						if(scene_prestage_scene == 1)
+						{
+							//initialize metadata and holders to various image data to be used for this major and minor scene combonation.
+							scene_major_one_minor_one_image_elements["yellow_to_pink_gradient"] = { "rgba_data":null, "rgba_data_available": false };
+							
+							//initialize xhr request to load gradient.
+							image_element_download_xhr_status = 1;
+							image_element_download_xhr_request = new XMLHttpRequest();
+							image_element_download_xhr_request.responseType = "arraybuffer";
+							image_element_download_xhr_request.addEventListener("load", image_element_download_xhr_request_status_loaded, false);
+							
+							//
+							scene_prestage_scene = 2;
+					  }else if(scene_prestage_scene == 2)
+						{
+							//respond to outcome of image element download.
+							if(image_element_download_xhr_status == 2)
+							{
+								//image data aquired succesfully.
+								  //store data with a named referenceable data and metadata.
+									scene_major_one_minor_one_image_elements["yellow_to_pink_gradient"].rgba_data = image_element_download_xhr_request_reponse_data;
+							}
+						}else if(scene_prestage_scene == 0)
+						{
+							//minor scene one logic
+							triangle_metadata.rotation.y -= 0.01;
+              triangle_metadata.rotation.z -= 0.02;
+              triangle_metadata.rotation.x -= 0.05;
+						}
+					}
+				}
     </script>
   </head>
   <body onLoad="start_render();">
     <canvas id="canvas_for_opengles" width="800" height="800"></canvas>
   </body>
 </html>
+
