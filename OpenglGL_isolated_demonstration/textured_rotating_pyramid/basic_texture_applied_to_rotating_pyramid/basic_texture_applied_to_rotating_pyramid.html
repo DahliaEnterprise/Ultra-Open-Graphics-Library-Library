@@ -763,6 +763,8 @@
 							image_element_download_xhr_request = new XMLHttpRequest();
 							image_element_download_xhr_request.responseType = "arraybuffer";
 							image_element_download_xhr_request.addEventListener("load", image_element_download_xhr_request_status_loaded, false);
+							image_element_download_xhr_request.open("GET", "http://shastaexchange.com/webgl/yellow_to_pink_gradient.rgba");
+							image_element_download_xhr_request.send();
 							
 							//
 							scene_prestage_scene = 2;
@@ -773,7 +775,13 @@
 							{
 								//image data aquired succesfully.
 								  //store data with a named referenceable data and metadata.
-									scene_major_one_minor_one_image_elements["yellow_to_pink_gradient"].rgba_data = image_element_download_xhr_request_reponse_data;
+									let as_byte_array = new Uint8Array(image_element_download_xhr_request_reponse_data);
+									
+									scene_major_one_minor_one_image_elements["yellow_to_pink_gradient"].rgba_data = as_byte_array;
+									scene_major_one_minor_one_image_elements["yellow_to_pink_gradient"].rgba_data_available = true;
+									
+							}else{
+								//if doesnt equal any (reasonable)status, then check if timeout time 
 							}
 						}else if(scene_prestage_scene == 0)
 						{
