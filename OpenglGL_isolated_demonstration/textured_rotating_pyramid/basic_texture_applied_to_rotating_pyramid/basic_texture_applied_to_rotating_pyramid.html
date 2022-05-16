@@ -487,30 +487,6 @@
          opengles.bufferData(opengles.ARRAY_BUFFER, triangle_and_texturecoordinates_vertex_manipulated, opengles.STATIC_DRAW);
 				 
 				 
-         /*triangle_vertex_opengles.positionSize = 3;
-         triangle_vertex_opengles.colorSize = 4;
-            
-         triangle_vertex_opengles.numberOfItems = triangle_total_rows; 
-            
-         //draw
-         opengles.useProgram(solid_color_shader_program);
-       
-         solid_color_shader_program.vertexPositionAttribute = opengles.getAttribLocation(solid_color_shader_program, "position_of_vertex_to_colorize");
-         
-         solid_color_shader_program.vertexColorAttribute = opengles.getAttribLocation(solid_color_shader_program, "color_of_vertex_to_colorize");
-          
-         opengles.vertexAttribPointer(solid_color_shader_program.vertexPositionAttribute,  triangle_vertex_opengles.positionSize, opengles.FLOAT, false, 28, 0);
-        
-         opengles.vertexAttribPointer(solid_color_shader_program.vertexColorAttribute,  triangle_vertex_opengles.colorSize, opengles.FLOAT, false, 28, 12);
-        
-         opengles.enableVertexAttribArray(solid_color_shader_program.vertexPositionAttribute);
-      
-         opengles.enableVertexAttribArray(solid_color_shader_program.vertexColorAttribute);
-        
-         opengles.drawArrays(opengles.TRIANGLES, 0, triangle_vertex_opengles.numberOfItems);
-         */
-				 
-				 
 				 
 				 let float_size = triangle_and_texturecoordinates_vertex_manipulated.BYTES_PER_ELEMENT;
 					 
@@ -525,7 +501,7 @@
             
 						
 						
-				//opengles.pixelStorei(opengles.UNPACK_FLIP_Y_WEBGL, 1);
+				opengles.pixelStorei(opengles.UNPACK_FLIP_Y_WEBGL, 1);
              
              
 			  //alert the gpu where to open and ready for unloading of texture data to gpu memory.
