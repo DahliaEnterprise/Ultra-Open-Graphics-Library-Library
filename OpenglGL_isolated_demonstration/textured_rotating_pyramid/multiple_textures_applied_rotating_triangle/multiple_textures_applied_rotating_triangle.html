@@ -68,7 +68,8 @@
 		  //texture catalogue
 			var texture_catalogue = [];
 			var texture_catalogue_cloneable_entry = { "rgba_data": null, "rgba_data_downloaded": false,  "image_element_download_xhr_status": 0, "rgba_data_url": null};
-				
+			var texture_catalogue_current_download_target = null;
+			
       //functions (header)
         //start main program
         var start_render = null;
@@ -420,7 +421,7 @@
         
         if(time_passed_since_last_render >= render_frame_interval)
         {
-          
+          /*
           //Clear the viewport(screen) before drawing a new frame. (you will always do it this way, the only rare times you will add on to an already drawn frame is maybe an Operating System window(or UI) that goes on top of everything else and usually only when there is no alpha or moving objects).
          opengles.clearColor(0.0, 0.0, 0.0, 1.0);
          opengles.viewport(0, 0, opengles.viewportWidth, opengles.viewportHeight);
@@ -481,7 +482,7 @@
                                 
                                              ]);
                                              
-                                            */ 
+                                            *
 				 
          triangle_vertex_opengles = opengles.createBuffer();
          //opengles.bindBuffer(opengles.ARRAY_BUFFER, triangle_vertex_opengles);
@@ -533,7 +534,7 @@
          opengles.deleteBuffer(triangle_vertex_opengles);
          triangle_vertex_opengles = null;
         
-      
+      */
          render_frame_last_rendered_timestamp = Date.now();
         
         }
@@ -915,6 +916,7 @@
 						//prestage
 						if(scene_prestage_scene == 1)
 						{
+							/*
 							//initialize metadata and holders to various image data to be used for this major and minor scene combonation.
 							scene_major_one_minor_one_image_elements["yellow_to_pink_gradient"] = { "rgba_data":null, "rgba_data_available": false, "dimensions": { "width": 200, "height": 200} };
 							
@@ -925,11 +927,38 @@
 							image_element_download_xhr_request.addEventListener("load", image_element_download_xhr_request_status_loaded, false);
 							image_element_download_xhr_request.open("GET", "http://shastaexchange.com/webgl/yellow_to_pink_gradient.rgba");
 							image_element_download_xhr_request.send();
+							*/
+							
+							//define list of textures to download
+							  //yellow to pink gradient
+					  		texture_catalogue["yellow_to_pink_gradient"] = {};
+						  	texture_catalogue["yellow_to_pink_gradient"] = JSON.parse(JSON.stringify(texture_catalogue_cloneable_entry));
+							
+						  	texture_catalogue["yellow_to_pink_gradient"].rgba_data_url = "http://shastaexchange.com/webgl/yellow_to_pink_gradient.rgba";
+							
+								//yellow smile face
+								texture_catalogue["yellow_smile_face"] = {};
+							  texture_catalogue["yellow_smile_face"] = JSON.parse(JSON.stringify(texture_catalogue_cloneable_entry));
+							
+							  texture_catalogue["yellow_smile_face"].rgba_data_url = "http://shastaexchange.com/webgl/yellow_smile_face.rgba";
+							
+							//reset current download target
+							texture_catalogue_current_download_target = null;
 							
 							//
-							scene_prestage_scene = 2;
+							scene_prestage_scene = 2
 					  }else if(scene_prestage_scene == 2)
 						{
+							//find a download target(if not already "targeting")
+							if(texture_catalogue_current_download_target == null)
+							{
+								//find a target to download, if they are all downloaded go to prestage scene three
+								
+							}else{
+								//continue waiting for target download response, load, error, abort, progress.
+							}
+							
+							/**
 							//respond to outcome of image element download.
 							if(image_element_download_xhr_status == 2)
 							{
@@ -956,6 +985,7 @@
 							}else{
 								//if doesnt equal any (reasonable)status, then check if timeout time 
 							}
+							*/
 						}else if(scene_prestage_scene == 0)
 						{
 							//minor scene one logic
