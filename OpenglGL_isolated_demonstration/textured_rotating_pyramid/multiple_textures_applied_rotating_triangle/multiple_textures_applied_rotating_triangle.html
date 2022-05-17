@@ -67,7 +67,7 @@
 
 		  //texture catalogue
 			var texture_catalogue = [];
-			var texture_catalogue_cloneable_entry = { "rgba_data": null, "rgba_data_downloaded": false,  "image_element_download_xhr_status": 0, "rgba_data_url": null};
+			var texture_catalogue_cloneable_entry = { "rgba_data": null, "rgba_data_downloaded": false,  "rgba_data_url": null, "dimensions": { "width": null, "height": null}, "opengles_texture_buffer": null };
 			var texture_catalogue_current_download_target = null;
 			
       //functions (header)
@@ -118,7 +118,6 @@
 			{
 				image_element_download_xhr_status = 2;
 				image_element_download_xhr_request_reponse_data = image_element_download_xhr_request.response;
-				console.log(image_element_download_xhr_request_reponse_data);
 			}
 			
       combine_vertex_and_rgba_color = function(vertex, rgba_color, total_rows)
@@ -357,7 +356,12 @@
 																										];
 																								
        triangle_total_rows = 12;
-         
+       
+			 //cache texture coordinates within the gpu/gram relationship.
+			 triangle_texture_coordinates_opengles = opengles.createBuffer();
+		   opengles.bindBuffer(opengles.ARRAY_BUFFER, triangle_texture_coordinates_opengles);
+			 opengles.bufferData(opengles.ARRAY_BUFFER, new Float32Array(triangle_texture_coordinates), opengles.STATIC_DRAW);
+									
          
        //define square(to point at) vertex
 			 square_vertex = new Float32Array([
@@ -935,13 +939,18 @@
 						  	texture_catalogue["yellow_to_pink_gradient"] = JSON.parse(JSON.stringify(texture_catalogue_cloneable_entry));
 							
 						  	texture_catalogue["yellow_to_pink_gradient"].rgba_data_url = "http://shastaexchange.com/webgl/yellow_to_pink_gradient.rgba";
-							
+							  texture_catalogue["yellow_to_pink_gradient"].dimensions.width = 200;
+								texture_catalogue["yellow_to_pink_gradient"].dimensions.height = 200;
+								
 								//yellow smile face
 								texture_catalogue["yellow_smile_face"] = {};
 							  texture_catalogue["yellow_smile_face"] = JSON.parse(JSON.stringify(texture_catalogue_cloneable_entry));
 							
 							  texture_catalogue["yellow_smile_face"].rgba_data_url = "http://shastaexchange.com/webgl/yellow_smile_face.rgba";
-							
+							  texture_catalogue["yellow_smile_face"].dimensions.width = 845;
+								texture_catalogue["yellow_smile_face"].dimensions.height = 845;
+								
+								
 							//reset current download target
 							texture_catalogue_current_download_target = null;
 							
@@ -952,7 +961,7 @@
 							//find a download target(if not already "targeting")
 							if(texture_catalogue_current_download_target == null)
 							{
-								//find a target to download, if they are all downloaded go to prestage scene three
+								//find a target to download, if they are all downloaded go to scene: major one, minor one.
 								let list_of_keys = Object.keys(texture_catalogue);
 								let index = 0;
 								let keep_searching_for_next_target = 1;
@@ -963,8 +972,22 @@
 									  //has this texture been downloaded?
 									  if(texture_catalogue[list_of_keys[index]].rgba_data_downloaded == false)
 									  {
+											//flag current work is download manager(null means no more texture download work available)
 									    texture_catalogue_current_download_target = list_of_keys[index];
 										
+											//initiate download
+											//initialize xhr request to load gradient.
+											image_element_download_xhr_request_reponse_data = null;
+											image_element_download_xhr_request = null;
+											
+						     	    image_element_download_xhr_status = 1;
+							        image_element_download_xhr_request = new XMLHttpRequest();
+							        image_element_download_xhr_request.responseType = "arraybuffer";
+							        image_element_download_xhr_request.addEventListener("load", image_element_download_xhr_request_status_loaded, false);
+							        image_element_download_xhr_request.open("GET", texture_catalogue[texture_catalogue_current_download_target].rgba_data_url);
+							        image_element_download_xhr_request.send();
+							
+											
 									    keep_searching_for_next_target = 0;
 								    }
 									
@@ -975,18 +998,42 @@
 									}
 								}
 							}
-							
 							//if no targets found, move off prestage and on to the major one, minor one scene, otherwise, continue waiting for current target network response to download request.
 							if(texture_catalogue_current_download_target == null)
 							{
 								//still equals null, all targets have been downloaded.
-								
-								
+								scene_prestage_scene = 0;
+								console.log("scene");
 							}else if(texture_catalogue_current_download_target != null)
 							{
 								//continue waiting for target download response, load, error, abort, progress.
-								
-								
+								if(image_element_download_xhr_status == 1)
+								{
+									//update progress with a loading bar.
+									
+								}else if(image_element_download_xhr_status == 2)
+								{
+									//completly loaded this rgba data.
+									  //store data with a named referenceable data and metadata.
+									  let as_byte_array = new Uint8Array(image_element_download_xhr_request_reponse_data);
+									  
+										//store image data on cpu/ram relationship(reuseable with multiple vertices)
+										texture_catalogue[texture_catalogue_current_download_target].rgba_data = as_byte_array;
+										
+										//store image data on gpu/ram relationship(reuseable with multiple vertices and faster then reuploading every frame draw, can not verbalize why it should be jept on cpu ram also, im sure there is a gaming logic use for it?)
+									  let opengles_texture_buffer = opengles.createTexture();
+										opengles.bindTexture(opengles.TEXTURE_2D, opengles_texture_buffer);
+									  opengles.texImage2D(opengles.TEXTURE_2D, 0, opengles.RGBA, texture_catalogue[texture_catalogue_current_download_target].dimensions.width, texture_catalogue[texture_catalogue_current_download_target].dimensions.height, 0, opengles.RGBA, opengles.UNSIGNED_BYTE, texture_catalogue[texture_catalogue_current_download_target].rgba_data);
+									    //do store refernceable variable
+										  texture_catalogue[texture_catalogue_current_download_target].opengles_texture_buffer = opengles_texture_buffer;
+										
+								  console.log(texture_catalogue_current_download_target);
+									texture_catalogue[texture_catalogue_current_download_target].rgba_data_downloaded = true;
+									image_element_download_xhr_status = 0;
+											
+									//flag no work is currently being accomplished.
+									texture_catalogue_current_download_target = null;
+								}
 							}
 							
 							/**
@@ -1019,10 +1066,16 @@
 							*/
 						}else if(scene_prestage_scene == 0)
 						{
-							//minor scene one logic
-							triangle_metadata.rotation.y -= 0.01;
-              triangle_metadata.rotation.z -= 0.02;
-              triangle_metadata.rotation.x -= 0.05;
+							if(scene_major_scene == 1)
+							{
+								if(scene_minor_scene == 1)
+								{
+								  //minor scene one logic
+							    triangle_metadata.rotation.y -= 0.01;
+                  triangle_metadata.rotation.z -= 0.02;
+                  triangle_metadata.rotation.x -= 0.05;
+								}
+							}
 						}
 					}
 				}
@@ -1032,4 +1085,3 @@
     <canvas id="canvas_for_opengles" width="800" height="800"></canvas>
   </body>
 </html>
-
