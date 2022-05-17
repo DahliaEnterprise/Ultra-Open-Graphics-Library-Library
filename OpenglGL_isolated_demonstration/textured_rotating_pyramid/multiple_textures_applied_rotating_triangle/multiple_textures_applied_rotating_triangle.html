@@ -953,9 +953,40 @@
 							if(texture_catalogue_current_download_target == null)
 							{
 								//find a target to download, if they are all downloaded go to prestage scene three
+								let list_of_keys = Object.keys(texture_catalogue);
+								let index = 0;
+								let keep_searching_for_next_target = 1;
+								while(keep_searching_for_next_target == 1)
+								{
+									if(index < list_of_keys.length)
+									{
+									  //has this texture been downloaded?
+									  if(texture_catalogue[list_of_keys[index]].rgba_data_downloaded == false)
+									  {
+									    texture_catalogue_current_download_target = list_of_keys[index];
+										
+									    keep_searching_for_next_target = 0;
+								    }
+									
+									  index = index + 1;
+								  }else if(index >= list_of_keys.length)
+									{
+										keep_searching_for_next_target = 0;
+									}
+								}
+							}
+							
+							//if no targets found, move off prestage and on to the major one, minor one scene, otherwise, continue waiting for current target network response to download request.
+							if(texture_catalogue_current_download_target == null)
+							{
+								//still equals null, all targets have been downloaded.
 								
-							}else{
+								
+							}else if(texture_catalogue_current_download_target != null)
+							{
 								//continue waiting for target download response, load, error, abort, progress.
+								
+								
 							}
 							
 							/**
@@ -1001,3 +1032,4 @@
     <canvas id="canvas_for_opengles" width="800" height="800"></canvas>
   </body>
 </html>
+
