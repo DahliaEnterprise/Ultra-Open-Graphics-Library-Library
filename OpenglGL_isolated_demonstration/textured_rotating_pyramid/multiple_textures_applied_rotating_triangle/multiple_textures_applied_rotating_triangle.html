@@ -31,40 +31,43 @@
 				var texture_shader_program = null;
       
       //models
-        //combine vertex with rgba color
-        var combine_vertex_and_rgba_color = null;
+			  //function definitions model assistance
+          //combine vertex with rgba color
+          var combine_vertex_and_rgba_color = null;
 				
-				//combine vertex with texture coordinates.
-				var combine_vertex_and_texture_coordinates = null;
+				  //combine vertex with texture coordinates.
+				  var combine_vertex_and_texture_coordinates = null;
         
-        //multicolored triangle
-        var triangle_vertex = null;
-        var triangle_rgba_color = null;
-        var triangle_total_rows = null;
-        var triangle_vertex_opengles = null;
-        var triangle_metadata = { "position": { "x": 0.000000, "y": 0.000000, "z": 0.000000 },
+				//model definitions
+          //multicolored triangle
+          var triangle_vertex = null;
+          var triangle_rgba_color = null;
+          var triangle_total_rows = null;
+          var triangle_vertex_opengles = null;
+          var triangle_metadata = { "position": { "x": 0.000000, "y": 0.000000, "z": 0.000000 },
+                                    "rotation": { "x": 0.000000, "y": 0.000000, "z": 0.000000 },
+                                    "scale": {  "x": 1.000000, "y": 1.000000, "z": 1.000000 },
+                                  };
+          //var triangle_and_rgba_color_vertex_manipulated = null;
+          var triangle_and_texturecoordinates_vertex_manipulated = null;
+        
+				  var triangle_texture_coordinates = null;
+				
+				  //square to point towards
+				  var square_vertex = null;
+				  var square_rgba_color = null;
+			  	var square_total_rows = null;
+			  	var square_vertex_opengles = null;
+			  	var square_metadata = { "position": { "x": 0.000000, "y": 0.000000, "z": 0.000000 },
                                   "rotation": { "x": 0.000000, "y": 0.000000, "z": 0.000000 },
                                   "scale": {  "x": 1.000000, "y": 1.000000, "z": 1.000000 },
                                 };
-        //var triangle_and_rgba_color_vertex_manipulated = null;
-        var triangle_and_texturecoordinates_vertex_manipulated = null;
-        
+				  //var square_and_rgba_color_vertex_manipulated = null;
+          var square_and_texturecoordinates_vertex_manipulated = null;
 				
-				var triangle_texture_opengles = null;
-				var triangle_texture_coordinates_opengles = null;
-				var triangle_texture_coordinates = null;
+				  var square_texture_coordinates = null;
 				
-				//square to point towards
-				var square_vertex = null;
-				var square_rgba_color = null;
-				var square_total_rows = null;
-				var square_vertex_opengles = null;
-				var square_metadata = { "position": { "x": 0.000000, "y": 0.000000, "z": 0.000000 },
-                                  "rotation": { "x": 0.000000, "y": 0.000000, "z": 0.000000 },
-                                  "scale": {  "x": 1.000000, "y": 1.000000, "z": 1.000000 },
-                                };
-				var square_and_rgba_color_verte_manipulated = null;
-
+				
 		  //texture catalogue
 			var texture_catalogue = [];
 			var texture_catalogue_cloneable_entry = { "rgba_data": null, "rgba_data_downloaded": false,  "rgba_data_url": null, "dimensions": { "width": null, "height": null}, "opengles_texture_buffer": null };
@@ -357,23 +360,31 @@
 																								
        triangle_total_rows = 12;
        
-			 //cache texture coordinates within the gpu/gram relationship.
-			 triangle_texture_coordinates_opengles = opengles.createBuffer();
-		   opengles.bindBuffer(opengles.ARRAY_BUFFER, triangle_texture_coordinates_opengles);
-			 opengles.bufferData(opengles.ARRAY_BUFFER, new Float32Array(triangle_texture_coordinates), opengles.STATIC_DRAW);
-									
+			 
          
-       //define square(to point at) vertex
+       //define square, proverbial ground vertex
 			 square_vertex = new Float32Array([
-			                                    1.0, 1.0, 0.0,
-																					-1.0, 1.0, 0.0,
+			                                    1.0, 1.0, 0.1,
+																					-1.0, 1.0, 0.1,
 																					-1.0, -1.0, 0.0,
 																					
-																					1.0, 1.0, 0.0,
+																					1.0, 1.0, 0.1,
 																					-1.0, -1.0, 0.0,
 																					1.0, -1.0, 0.0
 			                                  ]);
 																				
+			 square_texture_coordinates = new Float32Array([
+			                                                  1.0, 1.0,
+																												0.0, 1.0,
+																												0.0, 0.0,
+																												
+																												1.0, 1.0,
+																												0.0, 0.0,
+																												1.0, 0.0
+			                                               ]);
+													
+			 square_total_rows = 6;		
+																										 
 			 //set scene parameters to initial/zero
 			 scene_prestage_scene = 1;
 			 scene_major_scene = 1;
@@ -448,53 +459,12 @@
 		   	 triangle_and_texturecoordinates_vertex_manipulated	= combine_vertex_and_texture_coordinates(triangle_vertex_manipulated, triangle_texture_coordinates, triangle_total_rows);
 				 
 				 
-				 /*triangle_and_texturecoordinates_vertex_manipulated = new Float32Array([ 
-                                             /* 1.0, -0.1, -0.5,
-                                              0.000001, -0.1, -0.5,
-                                              0.5, -0.2, -0.000001*
-                                              
-                                     0.01, 0.01, 00, 0.0, 1.0,
-                                    //bottom left
-                                    -0.20, -0.20, 0.20, 0.0, 1.0,
-                                    //bottom right
-                                    0.20, -0.20, 0.20, 1.0, 0.5,
-                                  
-                                  /* second triangle right side facing camera *
-                                    //top
-                                    0.01, 0.01, 0.0, 0.5, 1.0,
-                                    //bottom left
-                                    0.20, -0.20, 0.20, 0.0, 1.0,
-                                    //bottom right
-                                    0.20, -0.20, -0.2, 0.0, 1.0,
-                                  
-                                  /* third triangle left side facing camera *
-                                    //top 
-                                    0.01, 0.01, 0.0, 0.0, 1.0,
-                                    //bottom left
-                                    -0.20, -0.20, -0.2, 0.0, 1.0,
-                                    //bottom right
-                                    -0.20, -0.20, 0.2, 0.5, 1.0,
-                                  
-                                  /* fourth triangle back side facing camera *
-                                    //top
-                                    0.01, 0.01, 0.0, 0.2, 1.0,
-                                    //bottom right
-                                    0.20, -0.20, -0.2, 0.2, 1.0,
-                                    //bottom left
-                                    -0.20, -0.20, -0.2, 1.0, 0.2
-                                
-                                             ]);
-                                             
-                                           */
+				 
 				 
          triangle_vertex_opengles = opengles.createBuffer();
          opengles.bindBuffer(opengles.ARRAY_BUFFER, triangle_vertex_opengles);
          opengles.bufferData(opengles.ARRAY_BUFFER, triangle_and_texturecoordinates_vertex_manipulated, opengles.STATIC_DRAW);
              
-				 //opengles.bindBuffer(opengles.ARRAY_BUFFER, triangle_vertex_opengles);
-        // opengles.bufferData(opengles.ARRAY_BUFFER, triangle_and_texturecoordinates_vertex_manipulated, opengles.STATIC_DRAW);
-				 
-				 
 				 
 				 let float_size = triangle_and_texturecoordinates_vertex_manipulated.BYTES_PER_ELEMENT;
 					 
@@ -530,12 +500,74 @@
              
              //tell gpu what vertex to draw now that the texture to draw with it has been activated.
              opengles.useProgram(texture_shader_program);
-             opengles.drawArrays(opengles.TRIANGLES, 0, 12);
+             opengles.drawArrays(opengles.TRIANGLES, 0, triangle_total_rows);
 				
+				 //draw ground
+				 let square_vertex_manipulated = new Float32Array(square_vertex);
+         
+         square_vertex_manipulated =  render_frame_translate_rotation_z(square_vertex_manipulated, square_total_rows, square_metadata.rotation.z);
+         square_vertex_manipulated =  render_frame_translate_rotation_y(square_vertex_manipulated, square_total_rows, square_metadata.rotation.y);
+         
+         square_vertex_manipulated =  render_frame_translate_rotation_x(square_vertex_manipulated, square_total_rows, square_metadata.rotation.x);
+        
+         
+         //perspective
+         square_vertex_manipulated = alter_coordinate_for_vanishing_point_compensation(square_vertex_manipulated, square_total_rows);
+      
+       
+         //triangle_and_rgba_color_vertex_manipulated = combine_vertex_and_rgba_color(triangle_vertex_manipulated, triangle_rgba_color, triangle_total_rows);
+        
+		   	 square_and_texturecoordinates_vertex_manipulated	= combine_vertex_and_texture_coordinates(square_vertex_manipulated, square_texture_coordinates, square_total_rows);
+				 
+				 
+				 
+				 
+         square_vertex_opengles = opengles.createBuffer();
+         opengles.bindBuffer(opengles.ARRAY_BUFFER, square_vertex_opengles);
+         opengles.bufferData(opengles.ARRAY_BUFFER, square_and_texturecoordinates_vertex_manipulated, opengles.STATIC_DRAW);
+             
+				 
+				 float_size = square_and_texturecoordinates_vertex_manipulated.BYTES_PER_ELEMENT;
+					 
+				  attribute_position_coordinates = opengles.getAttribLocation(texture_shader_program, "a_Position");
+            opengles.vertexAttribPointer(attribute_position_coordinates, 3, opengles.FLOAT, false, (float_size * 5), 0);
+            opengles.enableVertexAttribArray(attribute_position_coordinates);
+        
+        
+         attribute_texture_coordinates = opengles.getAttribLocation(texture_shader_program, 'a_TexCoord');
+            opengles.vertexAttribPointer(attribute_texture_coordinates , 2, opengles.FLOAT, false, (float_size * 5), (float_size * 3));
+            opengles.enableVertexAttribArray(attribute_texture_coordinates);
+            
+						
+						
+				opengles.pixelStorei(opengles.UNPACK_FLIP_Y_WEBGL, 1);
+             
+             
+			  //alert the gpu where to open and ready for unloading of texture data to gpu memory.
+        opengles.activeTexture(opengles.TEXTURE0);
+             
+        opengles.bindTexture(opengles.TEXTURE_2D, texture_catalogue["yellow_smile_face"].opengles_texture_buffer);
+						 
+			  u_Sampler = opengles.getUniformLocation(texture_shader_program, 'u_Sampler');
+             //flag which sampler to use with uniform.
+             opengles.uniform1i(u_Sampler, 0);
+             
+             opengles.texParameteri(opengles.TEXTURE_2D, opengles.TEXTURE_MIN_FILTER, opengles.LINEAR);
+              
+             //upload image data from motherboard ram to gpu ram through cpu instructions.
+            // opengles.texImage2D(opengles.TEXTURE_2D, 0, opengles.RGBA, opengles.RGBA, opengles.UNSIGNED_BYTE, image_data);
+          opengles.texImage2D(opengles.TEXTURE_2D, 0, opengles.RGBA, texture_catalogue["yellow_smile_face"].dimensions.width, texture_catalogue["yellow_smile_face"].dimensions.height, 0, opengles.RGBA, opengles.UNSIGNED_BYTE, texture_catalogue["yellow_smile_face"].rgba_data);
+					
+					//tell gpu what vertex to draw now that the texture to draw with it has been activated.
+             opengles.useProgram(texture_shader_program);
+             opengles.drawArrays(opengles.TRIANGLES, 0, square_total_rows);
+						 
 				
          //cleanup
          opengles.deleteBuffer(triangle_vertex_opengles);
          triangle_vertex_opengles = null;
+				 opengles.deleteBuffer(square_vertex_opengles);
+				 square_vertex_opengles = null;
         
       
          render_frame_last_rendered_timestamp = Date.now();
