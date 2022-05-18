@@ -5,6 +5,22 @@
     <script type="text/javascript">
       /* Venmo: Shane-Betz1990 */
       
+      /*
+         OpenGL camera view is:
+         
+         Positive z is away from camera.
+         Negative z is toward camera
+          
+         Positive X is right side of camera.
+         Negative X is left side of Camera.
+
+         Positive Y is up of camera.
+         Negative Y is down of camera.
+
+         This was confirmed with out any modifiers like the vanishing point compensation, discovered using direct coordinates.
+      */
+
+
 			//image element download manager
 			var image_element_download_xhr_status = 0;
 			var image_element_download_xhr_request = null;
