@@ -364,11 +364,11 @@
          
        //define square, proverbial ground vertex
 			 square_vertex = new Float32Array([
-			                                    1.0, 1.0, 0.1,
-																					-1.0, 1.0, 0.1,
+			                                    1.0, 1.0, 0.5,
+																					-1.0, 1.0, 0.5,
 																					-1.0, -1.0, 0.0,
 																					
-																					1.0, 1.0, 0.1,
+																					1.0, 1.0, 0.5,
 																					-1.0, -1.0, 0.0,
 																					1.0, -1.0, 0.0
 			                                  ]);
@@ -621,7 +621,7 @@
         
           //determine angle
           let three_hundred_and_sixty_degrees_as_radians = get_two_dimensional_angle_as_radians(adjacent_opposite_hypotenus.adjacent, adjacent_opposite_hypotenus.hypotenus, 0, 0, point_two_z, point_two_y);
-      
+					
           //apply desired rotation
           let rotated_point = get_two_dimensional_apply_desired_rotation(three_hundred_and_sixty_degrees_as_radians, offset_x_rotation, adjacent_opposite_hypotenus.hypotenus);
       
@@ -662,7 +662,7 @@
         
           //determine angle
           let three_hundred_and_sixty_degrees_as_radians = get_two_dimensional_angle_as_radians(adjacent_opposite_hypotenus.adjacent, adjacent_opposite_hypotenus.hypotenus, 0, 0, point_two_z, point_two_x);
-      
+					
           //apply desired rotation
           let rotated_point = get_two_dimensional_apply_desired_rotation(three_hundred_and_sixty_degrees_as_radians, offset_y_rotation, adjacent_opposite_hypotenus.hypotenus);
       
@@ -1105,8 +1105,8 @@
 								if(scene_minor_scene == 1)
 								{
 								  //minor scene one logic
-							    triangle_metadata.rotation.y -= 0.01;
-                  triangle_metadata.rotation.z -= 0.02;
+							    //triangle_metadata.rotation.y -= 0.01;
+                  //triangle_metadata.rotation.z -= 0.02;
                   triangle_metadata.rotation.x -= 0.05;
 								}
 							}
